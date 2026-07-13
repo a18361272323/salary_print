@@ -3,6 +3,6 @@
   "private": true,
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node --check print-layout.js && node --check salary-data-loader.js && node --check print-workflow.js"
+    "check": "node --check print-layout.js && node --check salary-data-loader.js && node --check print-workflow.js && node --check app-logic.js && node --check workspace-template.js"
   }
 }
