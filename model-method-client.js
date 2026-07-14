@@ -1,8 +1,8 @@
 (function (root, factory) {
-  var api = factory();
+  var api = factory(root);
   if (typeof module === "object" && module.exports) module.exports = api;
   root.SalaryPrintModelMethodClient = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (root) {
   function createModelMethodClient(config) {
     var settings = config || {};
     var baseUrl = String(settings.baseUrl || "").replace(/\/$/, "");
