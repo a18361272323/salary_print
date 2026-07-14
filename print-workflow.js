@@ -1,16 +1,21 @@
 (function (root, factory) {
-  var loader = root.SalaryPrintDataLoader;
-  var layout = root.SalaryPrintLayout;
-  if (typeof module === "object" && module.exports) {
-    loader = loader || require("./salary-data-loader");
-    layout = layout || require("./print-layout");
-  }
-  var api = factory(loader, layout);
+  var api = factory(function () {
+    var loader = root.SalaryPrintDataLoader;
+    var layout = root.SalaryPrintLayout;
+    if (typeof module === "object" && module.exports) {
+      loader = loader || require("./salary-data-loader");
+      layout = layout || require("./print-layout");
+    }
+    return { loader: loader, layout: layout };
+  });
   if (typeof module === "object" && module.exports) module.exports = api;
   root.SalaryPrintWorkflow = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (loader, layout) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (getDependencies) {
   async function preparePrintDocument(input) {
     var config = input || {};
+    var dependencies = getDependencies();
+    var loader = dependencies.loader;
+    var layout = dependencies.layout;
     if (!loader || !layout) throw new Error("打印工作流依赖未加载");
     var loaded = await loader.loadAllSalaryRows(config.loader || {});
     var visibleColumns = (config.columns || []).filter(function (column) { return column.printFlag; });

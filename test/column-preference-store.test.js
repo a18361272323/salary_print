@@ -1,5 +1,8 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
 const test = require("node:test");
+const vm = require("node:vm");
 const { createColumnPreferenceStore } = require("../column-preference-store");
 
 test("uses direct model list params and creates or updates every current column", async () => {
@@ -11,4 +14,19 @@ test("uses direct model list params and creates or updates every current column"
   assert.equal(calls[0].params.owner_user_no, "user-7");
   assert.equal(calls[1].name, "update");
   assert.equal(calls[1].params.id, 8);
+});
+
+test("resolves app logic when it loads after the preference store in srcdoc", async () => {
+  const browser = { console };
+  browser.globalThis = browser;
+  vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "column-preference-store.js"), "utf8"), browser);
+  browser.SalaryPrintLogic = {
+    fromPreferenceRecords: (records) => records.map((record) => ({ key: record.column_key })),
+    toPreferenceRecords: () => []
+  };
+
+  const store = browser.SalaryPrintColumnPreferenceStore.createColumnPreferenceStore({ client: { run: async () => ({ list: [{ column_key: "NETPAY" }] }) }, getOwnerUserNo: async () => "user-1" });
+  const loaded = await store.load({ salaryGroupId: "group-1", salaryCycle: "202607" });
+
+  assert.deepEqual(loaded.preferences, [{ key: "NETPAY" }]);
 });
