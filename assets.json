@@ -1,18 +1,18 @@
 {
   "css": [
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/app.css"
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/app.css"
   ],
   "js": [
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/app-logic.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/workspace-template.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/month-picker.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/salary-data-loader.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/print-layout.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/print-workflow.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/print-renderer.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/model-method-client.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/runtime-context.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/column-preference-store.js",
-    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@ecd72abdf80bb54eb70bd9659a04c53eaff2385d/app.js"
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/app-logic.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/workspace-template.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/month-picker.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/salary-data-loader.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/print-layout.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/print-workflow.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/print-renderer.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/model-method-client.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/runtime-context.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/column-preference-store.js",
+    "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@33b9a35f3d3b410ce26a0ecfef9aca12ac289e72/app.js"
   ]
 }
