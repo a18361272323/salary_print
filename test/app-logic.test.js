@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 
-const { buildColumns, calculateTotals, normalizeRows, groupColumnsByTopGroup, fromPreferenceRecords, toPreferenceRecords, flattenCategoryHeaders } = require("../app-logic");
+const { buildColumns, calculateTotals, normalizeRows, groupColumnsByTopGroup, moveGroup, moveColumnWithinGroup, fromPreferenceRecords, toPreferenceRecords, flattenCategoryHeaders } = require("../app-logic");
 
 test("keeps non-printing fields for column configuration and assigns print widths", () => {
   const columns = buildColumns([
@@ -55,4 +55,26 @@ test("uses the category endpoint as the authoritative first header for existing 
   const columns = buildColumns([{ itemKey: "STFNAM", itemName: "姓名", categoryName: "人事信息", checkedStatus: "Y", totalHeadFlag: "N" }], [{ columnKey: "STFNAM", topGroup: "旧分组" }]);
 
   assert.equal(columns[0].group, "人事信息");
+});
+
+test("moves an entire first-level header group and rewrites its display order", () => {
+  const moved = moveGroup([
+    { key: "STFNAM", group: "人事信息", order: 100 },
+    { key: "BASEPAY", group: "基本工资项目", order: 200 },
+    { key: "ALLOW", group: "基本工资项目", order: 300 },
+    { key: "NETPAY", group: "统计项目", order: 400 }
+  ], "统计项目", -1);
+
+  assert.deepEqual(moved.map((column) => [column.key, column.order]), [["STFNAM", 100], ["NETPAY", 200], ["BASEPAY", 300], ["ALLOW", 400]]);
+});
+
+test("moves a second-level header only inside its first-level group", () => {
+  const moved = moveColumnWithinGroup([
+    { key: "STFNAM", group: "人事信息", order: 100 },
+    { key: "BASEPAY", group: "基本工资项目", order: 200 },
+    { key: "ALLOW", group: "基本工资项目", order: 300 },
+    { key: "NETPAY", group: "统计项目", order: 400 }
+  ], "ALLOW", -1);
+
+  assert.deepEqual(moved.map((column) => [column.key, column.order]), [["STFNAM", 100], ["ALLOW", 200], ["BASEPAY", 300], ["NETPAY", 400]]);
 });
