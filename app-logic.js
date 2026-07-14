@@ -7,6 +7,7 @@
   var requiredKeys = new Set(["STFNAM", "STFIDN", "GRSPAY", "NETPAY"]);
 
   function defaultGroup(header) {
+    if (header.categoryName) return header.categoryName;
     if (baseKeys.has(header.itemKey)) return "基础信息";
     if (header.itemKey === "GRSPAY") return "应发工资";
     if (header.itemKey === "NETPAY") return "实发工资";
@@ -27,7 +28,8 @@
       return {
         key: header.itemKey,
         label: saved.columnLabelOverride || header.itemName,
-        group: saved.topGroup || defaultGroup(header),
+        group: header.categoryName || saved.topGroup || defaultGroup(header),
+        secondGroup: saved.secondGroup || saved.columnLabelOverride || header.itemName,
         printFlag: saved.printFlag === undefined ? header.checkedStatus === "Y" : saved.printFlag,
         order: Number.isFinite(saved.displayOrder) ? saved.displayOrder : (index + 1) * 100,
         totalFlag: saved.totalFlag === undefined ? header.totalHeadFlag === "Y" : saved.totalFlag,
@@ -58,8 +60,33 @@
     }, {});
   }
 
-  function fromPreferenceRecords(records) { return (records || []).map(function (record) { return { id: record.id, columnKey: record.column_key, printFlag: Number(record.print_flag) === 1, displayOrder: Number(record.display_order), topGroup: record.top_group, totalFlag: Number(record.total_flag) === 1, columnLabelOverride: record.column_label_override, widthMm: Number(record.width_mm) || undefined, alignMode: record.align_mode, maskFlag: Number(record.mask_flag) === 1 }; }); }
-  function toPreferenceRecords(input) { var config = input || {}; return (config.columns || []).map(function (column) { return { config_scope: "personal", owner_user_no: config.ownerUserNo, salary_group_id: config.salaryGroupId, salary_cycle: config.salaryCycle, column_key: column.key, print_flag: column.printFlag ? 1 : 0, display_order: column.order, top_group: column.group || "", second_group: "", column_label_override: column.label || "", width_mm: column.widthMm || column.minWidthMm || null, vertical_text: 0, align_mode: column.alignMode || "center", data_type: "text", total_flag: column.totalFlag ? 1 : 0, mask_flag: column.maskFlag ? 1 : 0, sort_priority: 0, sort_direction: "ascending", enabled: 1, remark: "" }; }); }
+  function groupColumnsByTopGroup(columns) {
+    return (columns || []).reduce(function (groups, column) {
+      var label = column.group || "未分组";
+      var current = groups[groups.length - 1];
+      if (!current || current.label !== label) {
+        current = { label: label, columns: [] };
+        groups.push(current);
+      }
+      current.columns.push(column);
+      return groups;
+    }, []);
+  }
 
-  return { buildColumns: buildColumns, normalizeRows: normalizeRows, calculateTotals: calculateTotals, minimumPrintWidth: minimumPrintWidth, fromPreferenceRecords: fromPreferenceRecords, toPreferenceRecords: toPreferenceRecords };
+  function flattenCategoryHeaders(categories) {
+    return (categories || []).reduce(function (headers, category) {
+      return headers.concat((category.itemHeaders || []).map(function (item) {
+        return Object.assign({}, item, {
+          categoryName: category.categoryName || "工资项目",
+          checkedStatus: category.categoryShow === "N" ? "N" : "Y",
+          totalHeadFlag: item.itemKey === "GRSPAY" || item.itemKey === "NETPAY" ? "Y" : "N"
+        });
+      }));
+    }, []);
+  }
+
+  function fromPreferenceRecords(records) { return (records || []).map(function (record) { return { id: record.id, columnKey: record.column_key, printFlag: Number(record.print_flag) === 1, displayOrder: Number(record.display_order), topGroup: record.top_group, secondGroup: record.second_group, totalFlag: Number(record.total_flag) === 1, columnLabelOverride: record.column_label_override, widthMm: Number(record.width_mm) || undefined, alignMode: record.align_mode, maskFlag: Number(record.mask_flag) === 1 }; }); }
+  function toPreferenceRecords(input) { var config = input || {}; return (config.columns || []).map(function (column) { return { config_scope: "personal", owner_user_no: config.ownerUserNo, salary_group_id: config.salaryGroupId, salary_cycle: config.salaryCycle, column_key: column.key, print_flag: column.printFlag ? 1 : 0, display_order: column.order, top_group: column.group || "", second_group: column.secondGroup || column.label || "", column_label_override: column.label || "", width_mm: column.widthMm || column.minWidthMm || null, vertical_text: 0, align_mode: column.alignMode || "center", data_type: "text", total_flag: column.totalFlag ? 1 : 0, mask_flag: column.maskFlag ? 1 : 0, sort_priority: 0, sort_direction: "ascending", enabled: 1, remark: "" }; }); }
+
+  return { buildColumns: buildColumns, normalizeRows: normalizeRows, calculateTotals: calculateTotals, groupColumnsByTopGroup: groupColumnsByTopGroup, flattenCategoryHeaders: flattenCategoryHeaders, minimumPrintWidth: minimumPrintWidth, fromPreferenceRecords: fromPreferenceRecords, toPreferenceRecords: toPreferenceRecords };
 });

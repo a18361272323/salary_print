@@ -31,8 +31,15 @@ button:focus-visible,select:focus-visible{outline:3px solid rgba(183,151,88,.35)
 .panel-heading{display:flex;justify-content:space-between;align-items:center;padding-bottom:9px;border-bottom:1px solid var(--line)}
 .panel-heading span i{display:inline-block;width:7px;height:7px;background:var(--gold);margin-right:7px}
 .panel-heading button{border:0;padding:0;min-height:auto;color:var(--pine);background:transparent;font-size:12px}
-.column-item{display:flex;gap:8px;align-items:center;padding:10px 2px;border-bottom:1px solid var(--line);font-size:13px}
-.column-item small{display:block;color:var(--muted)}
+.column-group{margin-top:10px;border:1px solid var(--line);background:rgba(255,253,250,.42)}
+.column-group-head{display:flex;gap:8px;align-items:baseline;padding:8px 10px;background:rgba(23,77,66,.08);border-bottom:1px solid var(--line)}
+.column-group-head small,.column-item small{color:var(--muted);font:700 9px ui-monospace,monospace;letter-spacing:.08em}
+.column-group-head b{font-size:13px}
+.column-item{display:flex;gap:8px;align-items:center;margin:0;padding:9px 10px;border-bottom:1px solid var(--line);font-size:13px}
+.column-item:last-child{border-bottom:0}
+.column-item span{display:grid;gap:2px}
+.column-item b{font-weight:700}
+.column-item em{color:var(--muted);font-size:11px;font-style:normal}
 .preview-card{min-width:0}
 .preview-head{display:flex;justify-content:space-between;padding:0 3px 10px}
 .preview-head small{color:var(--muted);font-size:12px}
@@ -44,6 +51,8 @@ button:focus-visible,select:focus-visible{outline:3px solid rgba(183,151,88,.35)
 table{border-collapse:collapse;width:100%;font-size:var(--print-font,9pt);table-layout:fixed}
 th,td{border:1px solid var(--line);padding:2mm 1.5mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 th{background:#edf1ec}
+.group-header th{background:#dce7df;color:var(--pine-deep);font-size:.9em;letter-spacing:.04em}
+.column-header th{background:#edf1ec}
 .right{text-align:right;font-variant-numeric:tabular-nums}
 tfoot td{background:#f4ead3;font-weight:700}
 .signature{padding:7mm 0 2mm;border-top:1px solid var(--ink);font-size:9pt;white-space:nowrap}

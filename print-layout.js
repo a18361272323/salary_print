@@ -33,7 +33,7 @@
     var spec = getPaper(paper);
     var rowHeightMm = 7 * Number(fontPt || spec.preferredFontPt) / spec.preferredFontPt;
     function rows(reservedHeightMm) { return Math.max(1, Math.floor((spec.heightMm - reservedHeightMm) / rowHeightMm)); }
-    return { firstPageRows: rows(55), middlePageRows: rows(25), lastPageRows: rows(70) };
+    return { firstPageRows: rows(62), middlePageRows: rows(32), lastPageRows: rows(77) };
   }
 
   function paginatePrintRows(input) {
