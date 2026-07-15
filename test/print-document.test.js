@@ -14,6 +14,7 @@ test("builds a standalone document containing only physical print pages", () => 
   assert.match(html, /\.standalone-print \.right\{text-align:center!important\}/);
   assert.match(html, /@page\{size:A3 landscape;margin:9mm\}/);
   assert.match(html, /--print-font:8pt/);
+  assert.match(html, /\.standalone-print \.group-header th,\.standalone-print \.column-header th\{border:1\.5px solid #000!important;font-size:11pt;font-weight:700/);
 });
 
 test("keeps B4 landscape as a valid standalone print size", () => {

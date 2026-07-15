@@ -97,7 +97,7 @@ body{background:#fff;color:#000;font-family:"SimSun","宋体",serif}
 .continuation-title{height:28px;margin:0 0 3mm;line-height:28px;font-size:10pt}
 .print-page table{font-size:var(--print-font,9pt);table-layout:fixed}
 .print-page th,.print-page td{border:1px solid #000!important;text-align:center!important;vertical-align:middle!important;color:#000!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;word-break:break-word}
-.print-page .group-header th,.print-page .column-header th{height:26px;padding:1px 1.5mm;background:#fff!important;font-size:10pt;font-weight:400}
+.print-page .group-header th,.print-page .column-header th{border:1.5px solid #000!important;height:28px;padding:1px 1.5mm;background:#fff!important;font-size:11pt;font-weight:700}
 .print-page tbody td,.print-page tfoot td{height:20px;padding:1px 1.5mm;line-height:18px}
 .print-page tfoot td{background:#f0f0f0!important;font-weight:700}
 .print-page thead{display:table-header-group}

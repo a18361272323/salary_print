@@ -16,4 +16,5 @@ test("uses the table top edge as the only title-to-table separator", () => {
   assert.match(css, /\.print-page th,\.print-page td\{[^}]*text-align:center!important;vertical-align:middle!important/);
   assert.match(css, /\.print-title h2\{[^}]*text-decoration:underline/);
   assert.match(css, /@media print\{[\s\S]*?tbody tr,tfoot,.signature\{break-inside:avoid;page-break-inside:avoid\}/);
+  assert.match(css, /\.print-page \.group-header th,\.print-page \.column-header th\{border:1\.5px solid #000!important;[^}]*font-size:11pt;font-weight:700/);
 });
