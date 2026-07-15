@@ -8,6 +8,7 @@ test("adds a fallback manifest without replacing the helper-generated srcdoc str
 
   assert.match(patched, /const assetManifestUrls = \["https:\/\/cdn\.example\/assets\.json", "https:\/\/raw\.example\/assets\.json"\]/);
   assert.match(patched, /async function loadAssetManifest\(\)/);
+  assert.match(patched, /for \(let attempt = 0; attempt < 2; attempt\+\+\)/);
   assert.match(patched, /return new URL\(value, activeAssetManifestUrl\)\.href/);
   assert.match(patched, /loadAssetManifest\(\)/);
 });
