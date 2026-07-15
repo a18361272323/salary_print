@@ -15,6 +15,20 @@ test("uses direct model list params and creates or updates every current column"
   assert.equal(calls[0].params.profile_type, "column");
   assert.equal(calls[1].name, "update");
   assert.equal(calls[1].params.id, 8);
+  assert.equal(calls[1].params.profile_type, "column");
+});
+
+test("marks created column preference records with the column profile type", async () => {
+  const calls = [];
+  const store = createColumnPreferenceStore({
+    client: { run: async (name, params) => { calls.push({ name, params }); return {}; } },
+    getOwnerUserNo: async () => "user-7"
+  });
+
+  await store.save({ salaryGroupId: "g1", salaryCycle: "202607", records: [], columns: [{ key: "NETPAY", label: "实发工资", group: "结算", printFlag: true, order: 10, totalFlag: true }] });
+
+  assert.equal(calls[0].name, "create");
+  assert.equal(calls[0].params.profile_type, "column");
 });
 
 test("resolves app logic when it loads after the preference store in srcdoc", async () => {

@@ -64,6 +64,16 @@ th{background:#edf1ec}
 tfoot td{background:#f4ead3;font-weight:700}
 .signature{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;padding:7mm 0 2mm;font-size:9pt;text-align:center}
 .signature span{white-space:nowrap}
+.salary-layout-root{--salary-title-font-family:"SimSun","宋体",serif;--salary-title-size:20pt;--salary-title-color:#000000;--salary-title-underline:underline;--salary-group-header-font-family:"SimSun","宋体",serif;--salary-group-header-size:11pt;--salary-group-header-color:#000000;--salary-group-header-weight:bold;--salary-group-header-row-height:28px;--salary-field-header-font-family:"SimSun","宋体",serif;--salary-field-header-size:11pt;--salary-field-header-color:#000000;--salary-field-header-weight:bold;--salary-field-header-row-height:28px;--salary-body-font-family:"SimSun","宋体",serif;--salary-body-size:9pt;--salary-body-color:#000000;--salary-body-row-height:20px;--salary-total-font-family:"SimSun","宋体",serif;--salary-total-size:9pt;--salary-total-color:#000000;--salary-total-row-height:20px;--salary-border-color:#000000;--salary-border-width:1px;--salary-border-style:solid;--salary-signature-font-family:"SimSun","宋体",serif;--salary-signature-size:9pt;--salary-signature-color:#000000;--salary-signature-height:6mm}
+.salary-layout-root .print-title h2{font-family:var(--salary-title-font-family);font-size:var(--salary-title-size);color:var(--salary-title-color);text-decoration:var(--salary-title-underline)}
+.salary-layout-root .group-header th{font-family:var(--salary-group-header-font-family);font-size:var(--salary-group-header-size);color:var(--salary-group-header-color);font-weight:var(--salary-group-header-weight);height:var(--salary-group-header-row-height)}
+.salary-layout-root .column-header th{font-family:var(--salary-field-header-font-family);font-size:var(--salary-field-header-size);color:var(--salary-field-header-color);font-weight:var(--salary-field-header-weight);height:var(--salary-field-header-row-height)}
+.salary-layout-root tbody td{font-family:var(--salary-body-font-family);font-size:var(--salary-body-size);color:var(--salary-body-color);height:var(--salary-body-row-height)}
+.salary-layout-root tfoot td{font-family:var(--salary-total-font-family);font-size:var(--salary-total-size);color:var(--salary-total-color);height:var(--salary-total-row-height)}
+.salary-layout-root th,.salary-layout-root td{border:var(--salary-border-width) var(--salary-border-style) var(--salary-border-color)}
+.salary-layout-root .signature{min-height:var(--salary-signature-height);font-family:var(--salary-signature-font-family);font-size:var(--salary-signature-size);color:var(--salary-signature-color)}
+@media screen{.layout-editor{min-height:100vh;background:#f2f0e9;color:#202522}.layout-editor .layout-editor-toolbar{position:sticky;top:0;z-index:4;display:flex;gap:8px;align-items:center;padding:12px 18px;background:#20362f;color:#fff}.layout-editor .layout-editor-workspace{display:grid;grid-template-columns:minmax(0,1fr) 280px;min-height:0}.layout-editor .layout-editor-preview{padding:28px;overflow:auto;background:#d7d1c2}.layout-editor .layout-editor-inspector{width:280px;padding:14px;overflow:auto;background:#fdfbf5;border-left:1px solid #c9c1b1}.layout-editor .layout-editor-data-lock{padding:9px 18px;background:#ead9a9;border-bottom:1px solid #91782f;font-weight:bold}.layout-editor :focus-visible{outline:3px solid #b79758;outline-offset:2px}.layout-editor input[type=range]::-webkit-slider-thumb{width:8px;height:18px}.layout-editor input[type=range]::-moz-range-thumb{width:8px;height:18px;border:0;border-radius:0}.layout-editor .layout-editor-decoration{pointer-events:none}}
+@media screen and (max-width:960px){.layout-editor .layout-editor-toolbar{position:static;flex-wrap:wrap}.layout-editor .layout-editor-workspace{grid-template-columns:1fr}.layout-editor .layout-editor-inspector{width:auto;border-top:1px solid #c9c1b1;border-left:0}.layout-editor .layout-editor-preview{padding:16px}}
 .month-dialog{position:absolute;z-index:10;margin-top:66px;padding:12px;background:rgba(255,253,250,.96);border:1px solid var(--line);box-shadow:var(--shadow);width:min(330px,calc(100vw - 64px)}
 .month-dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .month-dialog-head button{min-height:auto;padding:3px 9px}
@@ -83,6 +93,7 @@ to{opacity:1;transform:none}
 .header-stamp{display:none}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+.layout-editor *{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 @media print{@page{size:var(--print-size,A4 landscape);margin:9mm}
 body{background:#fff;color:#000;font-family:"SimSun","宋体",serif}
@@ -93,15 +104,16 @@ body{background:#fff;color:#000;font-family:"SimSun","宋体",serif}
 .print-pages{display:block}
 .print-page,.standalone-print .print-page{box-shadow:none!important;padding:0;margin:0;min-height:0}
 .print-title{height:40px;margin:0 0 4mm;display:flex;align-items:center;justify-content:center}
-.print-title h2{margin:0;font-size:20pt;line-height:40px}
+.print-title h2{margin:0;font-size:var(--salary-title-size,20pt);line-height:40px}
 .continuation-title{height:28px;margin:0 0 3mm;line-height:28px;font-size:10pt}
-.print-page table{font-size:var(--print-font,9pt);table-layout:fixed}
-.print-page th,.print-page td{border:1px solid #000!important;text-align:center!important;vertical-align:middle!important;color:#000!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;word-break:break-word}
-.print-page .group-header th,.print-page .column-header th{border:1.5px solid #000!important;height:28px;padding:1px 1.5mm;background:#fff!important;font-size:11pt;font-weight:700}
-.print-page tbody td,.print-page tfoot td{height:20px;padding:1px 1.5mm;line-height:18px}
-.print-page tfoot td{background:#f0f0f0!important;font-weight:700}
+.print-page table{font-size:var(--salary-body-size,var(--print-font,9pt));table-layout:fixed}
+.print-page th,.print-page td{border:var(--salary-border-width,1px) var(--salary-border-style,solid) var(--salary-border-color,#000)!important;text-align:center!important;vertical-align:middle!important;color:var(--salary-body-color,#000)!important;font-family:var(--salary-body-font-family,"SimSun","宋体",serif)!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;word-break:break-word}
+.print-page .group-header th{border:var(--salary-border-width,1px) var(--salary-border-style,solid) var(--salary-border-color,#000)!important;height:var(--salary-group-header-row-height,28px);padding:1px 1.5mm;background:#fff!important;font-family:var(--salary-group-header-font-family,"SimSun","宋体",serif)!important;font-size:var(--salary-group-header-size,11pt);color:var(--salary-group-header-color,#000)!important;font-weight:var(--salary-group-header-weight,700)}
+.print-page .column-header th{border:var(--salary-border-width,1px) var(--salary-border-style,solid) var(--salary-border-color,#000)!important;height:var(--salary-field-header-row-height,28px);padding:1px 1.5mm;background:#fff!important;font-family:var(--salary-field-header-font-family,"SimSun","宋体",serif)!important;font-size:var(--salary-field-header-size,11pt);color:var(--salary-field-header-color,#000)!important;font-weight:var(--salary-field-header-weight,700)}
+.print-page tbody td{height:var(--salary-body-row-height,20px);padding:1px 1.5mm;line-height:18px;font-family:var(--salary-body-font-family,"SimSun","宋体",serif)!important;font-size:var(--salary-body-size,9pt);color:var(--salary-body-color,#000)!important}
+.print-page tfoot td{height:var(--salary-total-row-height,20px);padding:1px 1.5mm;line-height:18px;background:#f0f0f0!important;font-family:var(--salary-total-font-family,"SimSun","宋体",serif)!important;font-size:var(--salary-total-size,9pt);color:var(--salary-total-color,#000)!important;font-weight:700}
 .print-page thead{display:table-header-group}
 tbody tr,tfoot,.signature{break-inside:avoid;page-break-inside:avoid}
-.signature{color:#000;padding:6mm 0 2mm;font-family:"SimSun","宋体",serif}
+.signature{color:var(--salary-signature-color,#000)!important;padding:6mm 0 2mm;min-height:var(--salary-signature-height,6mm);font-family:var(--salary-signature-font-family,"SimSun","宋体",serif)!important;font-size:var(--salary-signature-size,9pt)}
 .print-page:last-child{break-after:auto;page-break-after:auto}
 }

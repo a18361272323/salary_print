@@ -26,7 +26,7 @@
   }
 
   function hasGlobalScope(record) {
-    return record && record.profile_type === "layout" && record.layout_scope === "global" && (record.salary_group_id === "" || record.salary_group_id === null || record.salary_group_id === undefined);
+    return record && record.profile_type === "layout" && record.layout_scope === "personal_default" && (record.salary_group_id === "" || record.salary_group_id === null || record.salary_group_id === undefined);
   }
 
   function hasGroupScope(record, salaryGroupId) {
@@ -62,6 +62,22 @@
     return null;
   }
 
+  function totalFromResponse(response) {
+    var body = response && response.body ? response.body : response;
+    var total = Number(body && (body.total || body.totalCount));
+    return Number.isFinite(total) && total >= 0 ? total : null;
+  }
+
+  function comparePreference(left, right) {
+    var leftVersion = Number(left.record.layout_version) || 0;
+    var rightVersion = Number(right.record.layout_version) || 0;
+    if (leftVersion !== rightVersion) return rightVersion - leftVersion;
+    var leftId = Number(left.record.id);
+    var rightId = Number(right.record.id);
+    if (Number.isFinite(leftId) && Number.isFinite(rightId) && leftId !== rightId) return rightId - leftId;
+    return String(right.record.id || "").localeCompare(String(left.record.id || ""));
+  }
+
   function emptyResult(ownerUserNo, warnings) {
     return {
       layout: config().createDefaultLayout(),
@@ -74,12 +90,12 @@
   function matchingExisting(records, scope, salaryGroupId, ownerUserNo) {
     var candidates;
     if (Array.isArray(records)) candidates = records;
-    else if (records && isPlainObject(records)) candidates = scope === "global" ? [records.global] : [records.group];
+    else if (records && isPlainObject(records)) candidates = scope === "personal_default" ? [records.global] : [records.group];
     else candidates = [];
     for (var index = 0; index < candidates.length; index += 1) {
       var record = candidates[index];
       if (!isPlainObject(record) || record.id === undefined || !sameValue(record.owner_user_no, ownerUserNo)) continue;
-      if (scope === "global" && hasGlobalScope(record)) return record;
+      if (scope === "personal_default" && hasGlobalScope(record)) return record;
       if (scope === "salary_group" && hasGroupScope(record, salaryGroupId)) return record;
     }
     return null;
@@ -113,44 +129,48 @@
           return emptyResult(ownerUserNo, warnings);
         }
 
-        var response;
+        var records = [];
+        var current = 1;
+        var pageSize = 20;
+        var total = null;
         try {
-          response = await client.run("list", { current: 1, pageSize: 20, owner_user_no: ownerUserNo, profile_type: "layout", enabled: 1 });
+          do {
+            var response = await client.run("list", { current: current, pageSize: pageSize, owner_user_no: ownerUserNo, profile_type: "layout", enabled: 1 });
+            var page = listFromResponse(response);
+            if (!page) throw new Error("invalid layout response");
+            if (!page.length && total !== null && records.length < total) throw new Error("incomplete layout response");
+            records = records.concat(page);
+            total = total === null ? totalFromResponse(response) : total;
+            if (!page.length) break;
+            current += 1;
+            if (total === null && page.length < pageSize) break;
+          } while ((total !== null && records.length < total) || (total === null && current <= 100));
         } catch (error) {
           warnings.push("版式配置加载失败，已使用默认版式");
           return emptyResult(ownerUserNo, warnings);
         }
-        var records = listFromResponse(response);
-        if (!records) {
-          warnings.push("版式配置返回格式无效，已使用默认版式");
-          return emptyResult(ownerUserNo, warnings);
-        }
 
-        var globalRecord = null;
-        var groupRecord = null;
-        var globalPayload = null;
-        var groupPayload = null;
+        var globalCandidates = [];
+        var groupCandidates = [];
         for (var index = 0; index < records.length; index += 1) {
           var record = records[index];
           if (!isPlainObject(record) || !isEnabled(record) || !sameValue(record.owner_user_no, ownerUserNo)) continue;
-          if (!globalRecord && hasGlobalScope(record)) {
+          if (hasGlobalScope(record)) {
             var parsedGlobal = parsePayload(record, warnings);
-            if (parsedGlobal) {
-              globalRecord = record;
-              globalPayload = parsedGlobal;
-            }
+            if (parsedGlobal) globalCandidates.push({ record: record, payload: parsedGlobal });
           }
-          if (!groupRecord && hasGroupScope(record, input.salaryGroupId)) {
+          if (hasGroupScope(record, input.salaryGroupId)) {
             var parsedGroup = parsePayload(record, warnings);
-            if (parsedGroup) {
-              groupRecord = record;
-              groupPayload = parsedGroup;
-            }
+            if (parsedGroup) groupCandidates.push({ record: record, payload: parsedGroup });
           }
         }
+        globalCandidates.sort(comparePreference);
+        groupCandidates.sort(comparePreference);
+        var globalChoice = globalCandidates[0] || null;
+        var groupChoice = groupCandidates[0] || null;
         return {
-          layout: config().mergeEffectiveLayout(globalPayload || {}, groupPayload || {}),
-          records: { global: globalRecord, group: groupRecord },
+          layout: config().mergeEffectiveLayout(globalChoice ? globalChoice.payload : {}, groupChoice ? groupChoice.payload : {}),
+          records: { global: globalChoice ? globalChoice.record : null, group: groupChoice ? groupChoice.record : null },
           ownerUserNo: ownerUserNo,
           warnings: warnings
         };
@@ -158,7 +178,7 @@
       save: async function (input) {
         var settings = input || {};
         var scope = settings.scope;
-        if (scope !== "global" && scope !== "salary_group") throw new Error("Unsupported layout profile scope");
+        if (scope !== "personal_default" && scope !== "salary_group") throw new Error("Unsupported layout profile scope");
         if (scope === "salary_group" && (settings.salaryGroupId === undefined || settings.salaryGroupId === null || settings.salaryGroupId === "")) throw new Error("Salary group scope requires a salaryGroupId");
 
         var ownerUserNo = normalizeOwnerUserNo(await getOwnerUserNo());
@@ -170,7 +190,7 @@
           column_key: "layout_profile",
           profile_type: "layout",
           layout_scope: scope,
-          salary_group_id: scope === "global" ? "" : settings.salaryGroupId,
+          salary_group_id: scope === "personal_default" ? "" : settings.salaryGroupId,
           layout_payload: payload,
           layout_version: nextVersion(existing),
           enabled: true

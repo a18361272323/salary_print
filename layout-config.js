@@ -185,7 +185,7 @@
 
   function toPersistedPayload(source, scope) {
     var payload = normalizeLayout(source);
-    if (scope === "global") delete payload.columnWidthsByKey;
+    if (scope === "personal_default") delete payload.columnWidthsByKey;
     return payload;
   }
 

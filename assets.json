@@ -15,10 +15,12 @@
     "./runtime-context.js",
     "./column-preference-store.js",
     "./layout-config.js",
+    "./layout-editor.js",
     "./layout-profile-store.js",
     "./request-environment.js",
     "./crypto-runtime.js",
     "./sortable-runtime.js",
+    "./app-session.js",
     "./app.js"
   ]
 }

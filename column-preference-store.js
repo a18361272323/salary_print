@@ -30,7 +30,7 @@
       save: async function (input) {
         var config = input || {};
         var owner = await getOwnerUserNo();
-        var records = logic().toPreferenceRecords({ ownerUserNo: owner, salaryGroupId: config.salaryGroupId, salaryCycle: config.salaryCycle, columns: config.columns });
+        var records = logic().toPreferenceRecords({ ownerUserNo: owner, salaryGroupId: config.salaryGroupId, salaryCycle: config.salaryCycle, columns: config.columns }).map(function (record) { return Object.assign({}, record, { profile_type: "column" }); });
         var existing = new Map((config.records || []).map(function (row) { return [row.column_key, row]; }));
         for (var index = 0; index < records.length; index += 1) {
           var record = records[index];

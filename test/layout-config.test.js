@@ -88,7 +88,7 @@ test("serializes CSS variables and scope-aware persistence payloads", function (
   assert.match(css, /--salary-title-color:#010203/);
   assert.match(css, /--salary-border-color:#000000/);
   assert.match(css, /--salary-body-row-height:20px/);
-  assert.equal(layout.toPersistedPayload(source, "global").columnWidthsByKey, undefined);
+  assert.equal(layout.toPersistedPayload(source, "personal_default").columnWidthsByKey, undefined);
   assert.deepEqual(layout.toPersistedPayload(source, "salary_group").columnWidthsByKey, { STFNAM: 24 });
   assert.equal(layout.fromPersistedPayload('{"title":{"fontSizePt":19}}').title.fontSizePt, 19);
   assert.equal(layout.fromPersistedPayload("not json").title.fontSizePt, 20);
