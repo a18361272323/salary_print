@@ -6,13 +6,13 @@ const { derivePageCapacity, evaluatePaperFit, paginatePrintRows } = require("../
 test("suggests A3 landscape instead of reducing an A4 print below 6.5pt", () => {
   const result = evaluatePaperFit({ paper: "A4 landscape", columns: [{ minWidthMm: 130 }, { minWidthMm: 130 }, { minWidthMm: 130 }] });
 
-  assert.deepEqual(result, { status: "suggest-a3", paper: "A4 landscape", fontPt: 6.5, suggestedPaper: "A3 landscape", requiredWidthMm: 390 });
+  assert.deepEqual(result, { status: "suggest-a3", paper: "A4 landscape", fontPt: 6.5, scale: 0.7153846153846154, widthRatio: 0.7153846153846154, suggestedPaper: "A3 landscape", requiredWidthMm: 390 });
 });
 
 test("uses a readable reduced font when A4 can fit within the lower limit", () => {
   const result = evaluatePaperFit({ paper: "A4 landscape", columns: [{ minWidthMm: 100 }, { minWidthMm: 100 }, { minWidthMm: 100 }] });
 
-  assert.deepEqual(result, { status: "fit", paper: "A4 landscape", fontPt: 8, requiredWidthMm: 300 });
+  assert.deepEqual(result, { status: "fit", paper: "A4 landscape", fontPt: 8, scale: 1, widthRatio: 0.93, requiredWidthMm: 300 });
 });
 
 test("reserves the final page for totals and signatures", () => {
@@ -42,4 +42,14 @@ test("reserves one row of vertical space for the grouped first-level header", ()
   const a4 = derivePageCapacity("A4 landscape", 9);
 
   assert.deepEqual(a4, { firstPageRows: 13, middlePageRows: 16, lastPageRows: 11 });
+});
+
+test("supports B4 landscape and reports the print-width ratio", () => {
+  const fit = evaluatePaperFit({ paper: "B4 landscape", columns: [{ minWidthMm: 173 }, { minWidthMm: 173 }] });
+  const b4 = derivePageCapacity("B4 landscape", 9);
+
+  assert.equal(fit.status, "fit");
+  assert.equal(fit.scale, 1);
+  assert.ok(fit.widthRatio >= 1);
+  assert.ok(b4.firstPageRows > 0);
 });

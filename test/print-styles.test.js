@@ -12,6 +12,8 @@ test("uses the table top edge as the only title-to-table separator", () => {
   assert.doesNotMatch(css, /\.continuation-title\{[^}]*border-bottom/);
   assert.match(css, /\.signature\{display:grid;grid-template-columns:repeat\(4,1fr\);[^}]*text-align:center/);
   assert.match(css, /@media print\{[\s\S]*?\.standalone-print \.print-page\{box-shadow:none!important/);
-  assert.match(css, /@media print\{[\s\S]*?\.print-page th,\.print-page td\{border-color:#000!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important/);
-  assert.match(css, /\.print-page \.right\{text-align:center!important\}/);
+  assert.match(css, /@media print\{[\s\S]*?\.print-page th,\.print-page td\{border:1px solid #000!important;text-align:center!important;vertical-align:middle!important/);
+  assert.match(css, /\.print-page th,\.print-page td\{[^}]*text-align:center!important;vertical-align:middle!important/);
+  assert.match(css, /\.print-title h2\{[^}]*text-decoration:underline/);
+  assert.match(css, /@media print\{[\s\S]*?tbody tr,tfoot,.signature\{break-inside:avoid;page-break-inside:avoid\}/);
 });

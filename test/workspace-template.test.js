@@ -9,4 +9,5 @@ test("provides loading progress, print fit summary and physical-page preview roo
   ["groupSelect", "monthPickerButton", "monthPickerDialog", "monthGrid", "queryButton", "paperSelect", "printButton", "saveColumns", "cancelLoadButton", "progressBar", "loadProgress", "printSummary", "printPages", "columnEditor"].forEach((id) => {
     assert.match(markup, new RegExp('id="' + id + '"'));
   });
+  assert.match(markup, /<option value="B4 landscape">B4 横向<\/option>/);
 });

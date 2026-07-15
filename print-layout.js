@@ -6,6 +6,7 @@
   var PAPERS = {
     "A4 landscape": { widthMm: 279, heightMm: 192, preferredFontPt: 9 },
     "A3 landscape": { widthMm: 402, heightMm: 279, preferredFontPt: 9 },
+    "B4 landscape": { widthMm: 346, heightMm: 239, preferredFontPt: 9 },
     "A4 portrait": { widthMm: 192, heightMm: 279, preferredFontPt: 9 }
   };
 
@@ -24,9 +25,9 @@
     var fontPt = Math.max(6.5, Math.floor(Math.min(1, ratio) * spec.preferredFontPt * 2) / 2);
     var scaledWidthMm = requiredWidthMm * fontPt / spec.preferredFontPt;
 
-    if (scaledWidthMm <= spec.widthMm) return { status: "fit", paper: paper, fontPt: fontPt, requiredWidthMm: requiredWidthMm };
-    if (paper !== "A3 landscape") return { status: "suggest-a3", paper: paper, fontPt: 6.5, suggestedPaper: "A3 landscape", requiredWidthMm: requiredWidthMm };
-    return { status: "adjust-columns", paper: paper, fontPt: 6.5, requiredWidthMm: requiredWidthMm };
+    if (scaledWidthMm <= spec.widthMm) return { status: "fit", paper: paper, fontPt: fontPt, scale: 1, widthRatio: ratio, requiredWidthMm: requiredWidthMm };
+    if (paper !== "A3 landscape") return { status: "suggest-a3", paper: paper, fontPt: 6.5, scale: Math.max(.5, ratio), widthRatio: ratio, suggestedPaper: "A3 landscape", requiredWidthMm: requiredWidthMm };
+    return { status: "adjust-columns", paper: paper, fontPt: 6.5, scale: Math.max(.5, ratio), widthRatio: ratio, requiredWidthMm: requiredWidthMm };
   }
 
   function derivePageCapacity(paper, fontPt) {

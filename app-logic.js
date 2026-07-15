@@ -15,12 +15,14 @@
   }
 
   function minimumPrintWidth(header) {
-    if (header.itemKey === "STFNAM") return 28;
-    if (header.itemKey === "ORGSEQ" || header.itemKey === "ORGNAM") return 40;
-    if (header.itemKey === "POSSEQ" || header.itemKey === "POSNAM") return 30;
-    if (header.itemKey === "STFIDN") return 34;
-    if (header.itemKey === "GRSPAY" || header.itemKey === "NETPAY" || header.totalHeadFlag === "Y") return 20;
-    return 18;
+    var label = String(header.itemName || "");
+    if (/天数|天/.test(label)) return 12;
+    if (header.itemKey === "ORGSEQ" || header.itemKey === "ORGNAM" || header.itemKey === "STFIDN") return 34;
+    if (header.itemKey === "POSSEQ" || header.itemKey === "POSNAM") return 28;
+    if (header.itemKey === "GRSPAY" || header.itemKey === "NETPAY") return 30;
+    if (header.totalHeadFlag === "Y" || header.itemShowType === "DEC") return 24;
+    if (header.itemKey === "STFNAM" || header.itemKey === "STFNBR" || header.itemKey === "STFTYP") return 18;
+    return 20;
   }
 
   function buildColumns(headers, preferences) {
@@ -32,6 +34,8 @@
         label: saved.columnLabelOverride || header.itemName,
         group: header.categoryName || saved.topGroup || defaultGroup(header),
         secondGroup: saved.secondGroup || saved.columnLabelOverride || header.itemName,
+        itemShowType: header.itemShowType,
+        itemShowFormat: header.itemShowFormat,
         printFlag: saved.printFlag === undefined ? header.checkedStatus === "Y" : saved.printFlag,
         order: Number.isFinite(saved.displayOrder) ? saved.displayOrder : (index + 1) * 100,
         totalFlag: saved.totalFlag === undefined ? header.totalHeadFlag === "Y" : saved.totalFlag,

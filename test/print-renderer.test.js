@@ -34,3 +34,22 @@ test("renders a consolidated salary title without duplicated group or cycle meta
   assert.doesNotMatch(html, /第 \d+ 页 \/ 共 \d+ 页/);
   assert.match(html, /<td class="right">10<\/td>/);
 });
+
+test("renders independent headers across two rows and formats printed values", () => {
+  const html = renderPrintPages({
+    pages: [{ kind: "first-last", rows: [{ STFNAM: "李明", BASEPAY: "3098.5", ATTEND: "22.8" }], includeSummary: true }],
+    columns: [
+      { key: "STFNAM", label: "姓名" },
+      { key: "BASEPAY", label: "基本工资", group: "应发工资", itemShowType: "DEC", itemShowFormat: "2", totalFlag: true },
+      { key: "ATTEND", label: "出勤天数", group: "考勤", itemShowType: "INT" }
+    ],
+    totals: { BASEPAY: 3098.5 },
+    title: "2026年7月一组工资表"
+  });
+
+  assert.match(html, /<tr class="group-header"><th rowspan="2">姓名<\/th><th colspan="1">应发工资<\/th><th colspan="1">考勤<\/th><\/tr>/);
+  assert.match(html, /<tr class="column-header"><th>基本工资<\/th><th>出勤天数<\/th><\/tr>/);
+  assert.match(html, /<td class="">李明<\/td><td class="right">3,098\.50<\/td><td class="">23<\/td>/);
+  assert.match(html, /<td class="right">3,098\.50<\/td>/);
+  assert.doesNotMatch(html, /第 \d+ 页/);
+});

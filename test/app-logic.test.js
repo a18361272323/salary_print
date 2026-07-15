@@ -11,9 +11,9 @@ test("keeps non-printing fields for column configuration and assigns print width
   ], []);
 
   assert.deepEqual(columns.map((column) => [column.key, column.printFlag, column.minWidthMm, column.optional]), [
-    ["STFNAM", true, 28, false],
+    ["STFNAM", true, 18, false],
     ["STFIDN", true, 34, false],
-    ["NETPAY", false, 20, false]
+    ["NETPAY", false, 30, false]
   ]);
 });
 
@@ -31,7 +31,18 @@ test("allocates wider printable columns to department and position values", () =
     { itemKey: "POSSEQ", itemName: "岗位", checkedStatus: "Y", totalHeadFlag: "N" }
   ], []);
 
-  assert.deepEqual(columns.map((column) => [column.key, column.minWidthMm]), [["ORGSEQ", 40], ["POSSEQ", 30]]);
+  assert.deepEqual(columns.map((column) => [column.key, column.minWidthMm]), [["ORGSEQ", 34], ["POSSEQ", 28]]);
+});
+
+test("keeps interface display metadata for type-aware print formatting", () => {
+  const columns = buildColumns([
+    { itemKey: "BASEPAY", itemName: "基本工资", itemShowType: "DEC", itemShowFormat: "2", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "ATTEND", itemName: "出勤天数", itemShowType: "INT", checkedStatus: "Y", totalHeadFlag: "N" }
+  ], []);
+
+  assert.deepEqual(columns.map((column) => [column.itemShowType, column.itemShowFormat]), [["DEC", "2"], ["INT", undefined]]);
+  assert.ok(columns[0].minWidthMm >= 20);
+  assert.ok(columns[1].minWidthMm <= 14);
 });
 
 test("keeps first and second header metadata and groups column settings by first header", () => {
