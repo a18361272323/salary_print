@@ -23,7 +23,7 @@
       load: async function (criteria) {
         var input = criteria || {};
         var owner = await getOwnerUserNo();
-        var response = await client.run("list", { current: 1, pageSize: 200, owner_user_no: owner, salary_group_id: input.salaryGroupId, salary_cycle: input.salaryCycle, enabled: 1 });
+        var response = await client.run("list", { current: 1, pageSize: 200, owner_user_no: owner, salary_group_id: input.salaryGroupId, salary_cycle: input.salaryCycle, profile_type: "column", enabled: 1 });
         var records = response.list || [];
         return { records: records, preferences: logic().fromPreferenceRecords(records) };
       },

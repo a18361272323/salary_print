@@ -6,7 +6,9 @@ function profile(overrides) {
   return Object.assign({
     id: 1,
     owner_user_no: "user-7",
-    scope_type: "global",
+    profile_type: "layout",
+    layout_scope: "global",
+    column_key: "layout_profile",
     salary_group_id: "",
     enabled: 1,
     layout_version: 1,
@@ -30,13 +32,13 @@ test("load scopes records to the resolved owner and layers group payload over gl
   const calls = [];
   const store = makeStore([
     profile({ layout_payload: JSON.stringify({ title: { fontSizePt: 18 }, body: { rowHeightPx: 24 } }) }),
-    profile({ id: 2, scope_type: "salary_group", salary_group_id: "group-1", layout_payload: { title: { fontSizePt: 16 }, columnWidthsByKey: { NETPAY: 36 } } }),
+    profile({ id: 2, layout_scope: "salary_group", salary_group_id: "group-1", layout_payload: { title: { fontSizePt: 16 }, columnWidthsByKey: { NETPAY: 36 } } }),
     profile({ id: 3, owner_user_no: "another-user", layout_payload: { title: { fontSizePt: 8 } } })
   ], calls);
 
   const loaded = await store.load({ salaryGroupId: "group-1" });
 
-  assert.deepEqual(calls[0], { method: "list", params: { current: 1, pageSize: 20, owner_user_no: "user-7", enabled: 1 } });
+  assert.deepEqual(calls[0], { method: "list", params: { current: 1, pageSize: 20, owner_user_no: "user-7", profile_type: "layout", enabled: 1 } });
   assert.equal(loaded.layout.title.fontSizePt, 16);
   assert.equal(loaded.layout.body.rowHeightPx, 24);
   assert.deepEqual(loaded.layout.columnWidthsByKey, { NETPAY: 36 });
@@ -50,7 +52,7 @@ test("load falls back from malformed and inapplicable records without throwing",
   const store = makeStore([
     profile({ id: 1, layout_payload: "not-json" }),
     profile({ id: 2, enabled: 0, layout_payload: { title: { fontSizePt: 8 } } }),
-    profile({ id: 3, scope_type: "salary_group", salary_group_id: "other-group", layout_payload: { title: { fontSizePt: 8 } } })
+    profile({ id: 3, layout_scope: "salary_group", salary_group_id: "other-group", layout_payload: { title: { fontSizePt: 8 } } })
   ], calls);
 
   const loaded = await store.load({ salaryGroupId: "group-1" });
@@ -136,12 +138,13 @@ test("save updates the matching global profile with widths excluded and version 
   assert.equal(calls[0].method, "update");
   assert.equal(calls[0].params.id, 8);
   assert.equal(calls[0].params.owner_user_no, "user-7");
-  assert.equal(calls[0].params.scope_type, "global");
+  assert.equal(calls[0].params.profile_type, "layout");
+  assert.equal(calls[0].params.layout_scope, "global");
+  assert.equal(calls[0].params.column_key, "layout_profile");
   assert.equal(calls[0].params.salary_group_id, "");
-  assert.equal(calls[0].params.layout_name, "默认版式");
   assert.equal(calls[0].params.layout_version, 4);
   assert.equal(calls[0].params.enabled, true);
-  assert.equal(JSON.parse(calls[0].params.layout_payload).columnWidthsByKey, undefined);
+  assert.equal(calls[0].params.layout_payload.columnWidthsByKey, undefined);
   assert.equal(result.operation, "update");
   assert.equal(result.record.id, 8);
   assert.deepEqual(result.response, { method: "update", id: 8 });
@@ -160,8 +163,8 @@ test("save creates a salary-group profile and retains its column widths", async 
   assert.equal(calls[0].method, "create");
   assert.equal(calls[0].params.salary_group_id, "group-1");
   assert.equal(calls[0].params.layout_version, 1);
-  assert.deepEqual(JSON.parse(calls[0].params.layout_payload).columnWidthsByKey, { NETPAY: 36 });
-  assert.equal(result.record.scope_type, "salary_group");
+  assert.deepEqual(calls[0].params.layout_payload.columnWidthsByKey, { NETPAY: 36 });
+  assert.equal(result.record.layout_scope, "salary_group");
 });
 
 test("save creates rather than updating a matching-looking record owned by someone else", async () => {

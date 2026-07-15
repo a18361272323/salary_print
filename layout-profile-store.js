@@ -26,11 +26,11 @@
   }
 
   function hasGlobalScope(record) {
-    return record && record.scope_type === "global" && (record.salary_group_id === "" || record.salary_group_id === null || record.salary_group_id === undefined);
+    return record && record.profile_type === "layout" && record.layout_scope === "global" && (record.salary_group_id === "" || record.salary_group_id === null || record.salary_group_id === undefined);
   }
 
   function hasGroupScope(record, salaryGroupId) {
-    return record && record.scope_type === "salary_group" && sameValue(record.salary_group_id, salaryGroupId);
+    return record && record.profile_type === "layout" && record.layout_scope === "salary_group" && sameValue(record.salary_group_id, salaryGroupId);
   }
 
   function config() {
@@ -115,7 +115,7 @@
 
         var response;
         try {
-          response = await client.run("list", { current: 1, pageSize: 20, owner_user_no: ownerUserNo, enabled: 1 });
+          response = await client.run("list", { current: 1, pageSize: 20, owner_user_no: ownerUserNo, profile_type: "layout", enabled: 1 });
         } catch (error) {
           warnings.push("版式配置加载失败，已使用默认版式");
           return emptyResult(ownerUserNo, warnings);
@@ -167,10 +167,11 @@
         var payload = config().toPersistedPayload(settings.layout, scope);
         var fields = {
           owner_user_no: ownerUserNo,
-          scope_type: scope,
+          column_key: "layout_profile",
+          profile_type: "layout",
+          layout_scope: scope,
           salary_group_id: scope === "global" ? "" : settings.salaryGroupId,
-          layout_name: "默认版式",
-          layout_payload: JSON.stringify(payload),
+          layout_payload: payload,
           layout_version: nextVersion(existing),
           enabled: true
         };

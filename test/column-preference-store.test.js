@@ -12,6 +12,7 @@ test("uses direct model list params and creates or updates every current column"
   await store.save({ salaryGroupId: "g1", salaryCycle: "202607", records: loaded.records, columns: [{ key: "NETPAY", label: "实发工资", group: "结算", printFlag: true, order: 10, totalFlag: true }] });
   assert.equal(calls[0].name, "list");
   assert.equal(calls[0].params.owner_user_no, "user-7");
+  assert.equal(calls[0].params.profile_type, "column");
   assert.equal(calls[1].name, "update");
   assert.equal(calls[1].params.id, 8);
 });
