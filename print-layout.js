@@ -16,24 +16,38 @@
     return spec;
   }
 
+  function getMarginMm(value) {
+    if (value === undefined) return undefined;
+    var margin = Number(value);
+    if (!Number.isFinite(margin)) return 9;
+    return Math.max(0, Math.min(20, margin));
+  }
+
+  function getUsableMeasurement(measurement, marginMm) {
+    if (marginMm === undefined) return measurement;
+    return Math.max(1, measurement + 18 - marginMm * 2);
+  }
+
   function evaluatePaperFit(input) {
     var config = input || {};
     var paper = config.paper || "A4 landscape";
     var spec = getPaper(paper);
+    var usableWidthMm = getUsableMeasurement(spec.widthMm, getMarginMm(config.marginMm));
     var requiredWidthMm = (config.columns || []).reduce(function (total, column) { return total + Number(column.minWidthMm || 18); }, 0);
-    var ratio = requiredWidthMm ? spec.widthMm / requiredWidthMm : 1;
+    var ratio = requiredWidthMm ? usableWidthMm / requiredWidthMm : 1;
     var fontPt = Math.max(6.5, Math.floor(Math.min(1, ratio) * spec.preferredFontPt * 2) / 2);
     var scaledWidthMm = requiredWidthMm * fontPt / spec.preferredFontPt;
 
-    if (scaledWidthMm <= spec.widthMm) return { status: "fit", paper: paper, fontPt: fontPt, scale: 1, widthRatio: ratio, requiredWidthMm: requiredWidthMm };
+    if (scaledWidthMm <= usableWidthMm) return { status: "fit", paper: paper, fontPt: fontPt, scale: 1, widthRatio: ratio, requiredWidthMm: requiredWidthMm };
     if (paper !== "A3 landscape") return { status: "suggest-a3", paper: paper, fontPt: 6.5, scale: Math.max(.5, ratio), widthRatio: ratio, suggestedPaper: "A3 landscape", requiredWidthMm: requiredWidthMm };
     return { status: "adjust-columns", paper: paper, fontPt: 6.5, scale: Math.max(.5, ratio), widthRatio: ratio, requiredWidthMm: requiredWidthMm };
   }
 
-  function derivePageCapacity(paper, fontPt) {
+  function derivePageCapacity(paper, fontPt, options) {
     var spec = getPaper(paper);
+    var usableHeightMm = getUsableMeasurement(spec.heightMm, getMarginMm(options && options.marginMm));
     var rowHeightMm = 10 * Number(fontPt || spec.preferredFontPt) / spec.preferredFontPt;
-    function rows(reservedHeightMm) { return Math.max(1, Math.floor((spec.heightMm - reservedHeightMm) / rowHeightMm)); }
+    function rows(reservedHeightMm) { return Math.max(1, Math.floor((usableHeightMm - reservedHeightMm) / rowHeightMm)); }
     return { firstPageRows: rows(62), middlePageRows: rows(32), lastPageRows: rows(77) };
   }
 

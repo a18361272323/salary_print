@@ -1,8 +1,12 @@
 (function (root, factory) {
-  var api = factory();
+  var api = factory(function () {
+    var layoutConfig = root.SalaryPrintLayoutConfig;
+    if (typeof module === "object" && module.exports) layoutConfig = layoutConfig || require("./layout-config");
+    return { layoutConfig: layoutConfig };
+  });
   if (typeof module === "object" && module.exports) module.exports = api;
   root.SalaryPrintRenderer = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function () {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (getDependencies) {
   function escapeHtml(value) { return String(value === undefined || value === null ? "" : value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
   function renderHeaderRows(columns) {
     var groups = [];
@@ -49,8 +53,12 @@
   }
   function cellClass(column) { return (column.alignMode === "right" || column.itemShowType === "DEC" || column.totalFlag) ? "right" : ""; }
   function renderPrintPages(input) {
-    var config = input || {}; var pages = config.pages || []; var columns = config.columns || []; var totals = config.totals || {};
-    return pages.map(function (page) {
+    var config = input || {}; var pages = config.pages || []; var sourceColumns = config.columns || []; var totals = config.totals || {};
+    var layoutConfig = getDependencies().layoutConfig;
+    var layout = layoutConfig ? layoutConfig.normalizeLayout(config.layout) : (config.layout || {});
+    var columns = layoutConfig ? layoutConfig.applyColumnWidths(sourceColumns, layout).columns : sourceColumns.map(function (column) { return Object.assign({}, column); });
+    var layoutCssVariables = layoutConfig ? layoutConfig.toLayoutCssVariables(layout) : "";
+    var pagesHtml = pages.map(function (page) {
       var isFirst = page.kind === "first" || page.kind === "first-last";
       var isLast = Boolean(page.includeSummary);
       var rows = (page.rows || []).map(function (row) { return "<tr>" + columns.map(function (column) { return '<td class="' + cellClass(column) + '">' + escapeHtml(formatValue(row[column.key], column)) + "</td>"; }).join("") + "</tr>"; }).join("");
@@ -59,6 +67,7 @@
       var signature = isLast ? renderSignature() : "";
       return '<section class="print-page print-page--' + page.kind + '">' + header + '<table>' + renderColumnWidths(columns) + '<thead>' + renderHeaderRows(columns) + "</thead><tbody>" + rows + "</tbody>" + summary + "</table>" + signature + "</section>";
     }).join("");
+    return '<div class="salary-layout-root" style="' + escapeHtml(layoutCssVariables) + '">' + pagesHtml + "</div>";
   }
   return { renderPrintPages: renderPrintPages };
 });
