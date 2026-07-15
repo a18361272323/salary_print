@@ -193,7 +193,7 @@
           salary_group_id: scope === "personal_default" ? "" : settings.salaryGroupId,
           layout_payload: payload,
           layout_version: nextVersion(existing),
-          enabled: true
+          enabled: 1
         };
         var operation = existing ? "update" : "create";
         var params = existing ? Object.assign({ id: existing.id }, fields) : fields;

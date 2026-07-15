@@ -179,7 +179,7 @@ test("save updates the matching personal-default profile with widths excluded an
   assert.equal(calls[0].params.column_key, "layout_profile");
   assert.equal(calls[0].params.salary_group_id, "");
   assert.equal(calls[0].params.layout_version, 4);
-  assert.equal(calls[0].params.enabled, true);
+  assert.equal(calls[0].params.enabled, 1);
   assert.equal(calls[0].params.layout_payload.columnWidthsByKey, undefined);
   assert.equal(result.operation, "update");
   assert.equal(result.record.id, 8);
@@ -199,6 +199,7 @@ test("save creates a salary-group profile and retains its column widths", async 
   assert.equal(calls[0].method, "create");
   assert.equal(calls[0].params.salary_group_id, "group-1");
   assert.equal(calls[0].params.layout_version, 1);
+  assert.equal(calls[0].params.enabled, 1);
   assert.deepEqual(calls[0].params.layout_payload.columnWidthsByKey, { NETPAY: 36 });
   assert.equal(result.record.layout_scope, "salary_group");
 });
