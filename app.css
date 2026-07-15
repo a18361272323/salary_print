@@ -64,7 +64,6 @@ th{background:#edf1ec}
 tfoot td{background:#f4ead3;font-weight:700}
 .signature{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;padding:7mm 0 2mm;font-size:9pt;text-align:center}
 .signature span{white-space:nowrap}
-.page-footer{text-align:right;margin-top:3mm;font-size:8pt;color:var(--muted)}
 .month-dialog{position:absolute;z-index:10;margin-top:66px;padding:12px;background:rgba(255,253,250,.96);border:1px solid var(--line);box-shadow:var(--shadow);width:min(330px,calc(100vw - 64px)}
 .month-dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .month-dialog-head button{min-height:auto;padding:3px 9px}
@@ -94,6 +93,7 @@ body{background:#fff}
 .print-pages{display:block}
 .print-page,.standalone-print .print-page{box-shadow:none!important;padding:0;margin:0;min-height:0}
 .print-page th,.print-page td{border-color:#000!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;word-break:break-word}
+.print-page .right{text-align:center!important}
 .print-page .group-header th,.print-page .column-header th,.print-page tfoot td{background:#fff!important}
 .print-page:last-child{break-after:auto;page-break-after:auto}
 }

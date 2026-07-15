@@ -31,6 +31,6 @@ test("renders a consolidated salary title without duplicated group or cycle meta
   assert.equal((html.match(/制表：/g) || []).length, 1);
   assert.match(html, /<\/table><footer class="signature">/);
   assert.match(html, /30\.00/);
-  assert.match(html, /第 1 页 \/ 共 2 页/);
-  assert.match(html, /第 2 页 \/ 共 2 页/);
+  assert.doesNotMatch(html, /第 \d+ 页 \/ 共 \d+ 页/);
+  assert.match(html, /<td class="right">10<\/td>/);
 });

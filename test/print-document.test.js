@@ -11,6 +11,7 @@ test("builds a standalone document containing only physical print pages", () => 
   assert.match(html, /\.standalone-print \.print-page\{[^}]*box-shadow:none!important/);
   assert.match(html, /border-color:#000!important/);
   assert.match(html, /white-space:normal!important/);
+  assert.match(html, /\.standalone-print \.right\{text-align:center!important\}/);
   assert.match(html, /@page\{size:A3 landscape;margin:9mm\}/);
   assert.match(html, /--print-font:8pt/);
 });
