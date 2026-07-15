@@ -25,6 +25,15 @@ test("parses salary rows and totals only enabled total columns", () => {
   assert.deepEqual(calculateTotals(rows, columns), { NETPAY: 98 });
 });
 
+test("allocates wider printable columns to department and position values", () => {
+  const columns = buildColumns([
+    { itemKey: "ORGSEQ", itemName: "部门", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "POSSEQ", itemName: "岗位", checkedStatus: "Y", totalHeadFlag: "N" }
+  ], []);
+
+  assert.deepEqual(columns.map((column) => [column.key, column.minWidthMm]), [["ORGSEQ", 40], ["POSSEQ", 30]]);
+});
+
 test("keeps first and second header metadata and groups column settings by first header", () => {
   const preferences = fromPreferenceRecords([{ column_key: "BASEPAY", print_flag: 1, display_order: 200, top_group: "应发工资", second_group: "固定收入", total_flag: 0 }]);
   const saved = toPreferenceRecords({ ownerUserNo: "user-1", salaryGroupId: "group-1", salaryCycle: "202607", columns: [{ key: "BASEPAY", label: "基本工资", group: "应发工资", secondGroup: "固定收入", printFlag: true, order: 200 }] });

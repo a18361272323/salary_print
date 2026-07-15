@@ -10,4 +10,7 @@ test("uses the table top edge as the only title-to-table separator", () => {
   assert.match(css, /\.continuation-title\{margin:0 0 4mm;font-size:9pt;text-align:center;font-weight:700\}/);
   assert.doesNotMatch(css, /\.print-title\{[^}]*border-bottom/);
   assert.doesNotMatch(css, /\.continuation-title\{[^}]*border-bottom/);
+  assert.match(css, /\.signature\{display:grid;grid-template-columns:repeat\(4,1fr\);[^}]*text-align:center/);
+  assert.match(css, /@media print\{[\s\S]*?\.standalone-print \.print-page\{box-shadow:none!important/);
+  assert.match(css, /@media print\{[\s\S]*?\.print-page th,\.print-page td\{border-color:#000!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important/);
 });

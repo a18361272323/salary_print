@@ -3,7 +3,7 @@
   if (typeof module === "object" && module.exports) module.exports = api;
   root.SalaryPrintLogic = api;
 })(typeof globalThis !== "undefined" ? globalThis : this, function () {
-  var baseKeys = new Set(["STFNAM", "STFNBR", "STFIDN", "ORGNAM", "POSNAM", "STFTYP", "STFSTS", "ENTDAT", "CORDAT", "QUTDAT"]);
+  var baseKeys = new Set(["STFNAM", "STFNBR", "STFIDN", "ORGNAM", "ORGSEQ", "POSNAM", "POSSEQ", "STFTYP", "STFSTS", "ENTDAT", "CORDAT", "QUTDAT"]);
   var requiredKeys = new Set(["STFNAM", "STFIDN", "GRSPAY", "NETPAY"]);
 
   function defaultGroup(header) {
@@ -16,6 +16,8 @@
 
   function minimumPrintWidth(header) {
     if (header.itemKey === "STFNAM") return 28;
+    if (header.itemKey === "ORGSEQ" || header.itemKey === "ORGNAM") return 40;
+    if (header.itemKey === "POSSEQ" || header.itemKey === "POSNAM") return 30;
     if (header.itemKey === "STFIDN") return 34;
     if (header.itemKey === "GRSPAY" || header.itemKey === "NETPAY" || header.totalHeadFlag === "Y") return 20;
     return 18;

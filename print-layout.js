@@ -31,7 +31,7 @@
 
   function derivePageCapacity(paper, fontPt) {
     var spec = getPaper(paper);
-    var rowHeightMm = 7 * Number(fontPt || spec.preferredFontPt) / spec.preferredFontPt;
+    var rowHeightMm = 10 * Number(fontPt || spec.preferredFontPt) / spec.preferredFontPt;
     function rows(reservedHeightMm) { return Math.max(1, Math.floor((spec.heightMm - reservedHeightMm) / rowHeightMm)); }
     return { firstPageRows: rows(62), middlePageRows: rows(32), lastPageRows: rows(77) };
   }

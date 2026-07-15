@@ -41,5 +41,5 @@ test("derives smaller printable capacities for A4 than A3", () => {
 test("reserves one row of vertical space for the grouped first-level header", () => {
   const a4 = derivePageCapacity("A4 landscape", 9);
 
-  assert.deepEqual(a4, { firstPageRows: 18, middlePageRows: 22, lastPageRows: 16 });
+  assert.deepEqual(a4, { firstPageRows: 13, middlePageRows: 16, lastPageRows: 11 });
 });
