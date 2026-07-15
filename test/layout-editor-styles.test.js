@@ -46,6 +46,9 @@ test("ships the responsive editor treatment inside the popup document", () => {
   assert.match(source, /@media print\{[\s\S]*?\.warning\{display:none\}/);
   assert.match(source, /<style>@media screen\{body\{margin:0;background:#f2f0e9/);
   assert.match(source, /\.layout-editor :focus-visible\{outline:3px solid #b79758;outline-offset:2px\}\}@media\(prefers-reduced-motion:reduce\)/);
+  assert.match(source, /\.layout-editor\{height:100vh;overflow:hidden;display:grid;grid-template-rows:auto auto minmax\(0,1fr\)\}/);
+  assert.match(source, /\.layout-editor-workspace\{[^}]*min-height:0;overflow:hidden/);
+  assert.match(source, /\.layout-editor-inspector\{[^}]*height:100%;[^}]*overflow-y:auto/);
 });
 
 test("formal print consumes configured tokens with black fallbacks", () => {
