@@ -24,3 +24,10 @@ test("uses the table top edge as the only title-to-table separator", () => {
   assert.match(css, /\.print-page \.group-header th\{border:var\(--salary-border-width,1px\) var\(--salary-border-style,solid\) var\(--salary-border-color,#000\)!important;[^}]*font-weight:var\(--salary-group-header-weight,700\)/);
   assert.match(css, /\.print-page \.column-header th\{border:var\(--salary-border-width,1px\) var\(--salary-border-style,solid\) var\(--salary-border-color,#000\)!important;[^}]*font-weight:var\(--salary-field-header-weight,700\)/);
 });
+
+test("centers salary table cells in the screen preview", () => {
+  const css = fs.readFileSync(path.join(__dirname, "..", "app.css"), "utf8");
+
+  assert.match(css, /\.print-page th,\.print-page td\{text-align:center;vertical-align:middle\}/);
+  assert.match(css, /\.print-page \.right\{text-align:center\}/);
+});

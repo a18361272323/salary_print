@@ -61,6 +61,8 @@ th{background:#edf1ec}
 .group-header th{background:#dce7df;color:var(--pine-deep);font-size:.9em;letter-spacing:.04em}
 .column-header th{background:#edf1ec}
 .right{text-align:right;font-variant-numeric:tabular-nums}
+.print-page th,.print-page td{text-align:center;vertical-align:middle}
+.print-page .right{text-align:center}
 tfoot td{background:#f4ead3;font-weight:700}
 .signature{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;padding:7mm 0 2mm;font-size:9pt;text-align:center}
 .signature span{white-space:nowrap}
