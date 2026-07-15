@@ -81,6 +81,21 @@
     return (columns || []).map(function (column, index) { return Object.assign({}, column, { order: (index + 1) * 100 }); });
   }
 
+  function orderColumnsByKeys(columns, keys) {
+    var lookup = new Map((columns || []).map(function (column) { return [column.key, column]; }));
+    var ordered = [];
+    (keys || []).forEach(function (key) {
+      var column = lookup.get(key);
+      if (!column) return;
+      ordered.push(column);
+      lookup.delete(key);
+    });
+    (columns || []).forEach(function (column) {
+      if (lookup.has(column.key)) ordered.push(column);
+    });
+    return rewriteDisplayOrders(ordered);
+  }
+
   function moveGroup(columns, groupLabel, delta) {
     var groups = groupColumnsByTopGroup(columns);
     var index = groups.findIndex(function (group) { return group.label === groupLabel; });
@@ -119,5 +134,5 @@
   function fromPreferenceRecords(records) { return (records || []).map(function (record) { return { id: record.id, columnKey: record.column_key, printFlag: Number(record.print_flag) === 1, displayOrder: Number(record.display_order), topGroup: record.top_group, secondGroup: record.second_group, totalFlag: Number(record.total_flag) === 1, columnLabelOverride: record.column_label_override, widthMm: Number(record.width_mm) || undefined, alignMode: record.align_mode, maskFlag: Number(record.mask_flag) === 1 }; }); }
   function toPreferenceRecords(input) { var config = input || {}; return (config.columns || []).map(function (column) { return { config_scope: "personal", owner_user_no: config.ownerUserNo, salary_group_id: config.salaryGroupId, salary_cycle: config.salaryCycle, column_key: column.key, print_flag: column.printFlag ? 1 : 0, display_order: column.order, top_group: column.group || "", second_group: column.secondGroup || column.label || "", column_label_override: column.label || "", width_mm: column.widthMm || column.minWidthMm || null, vertical_text: 0, align_mode: column.alignMode || "center", data_type: "text", total_flag: column.totalFlag ? 1 : 0, mask_flag: column.maskFlag ? 1 : 0, sort_priority: 0, sort_direction: "ascending", enabled: 1, remark: "" }; }); }
 
-  return { buildColumns: buildColumns, normalizeRows: normalizeRows, calculateTotals: calculateTotals, groupColumnsByTopGroup: groupColumnsByTopGroup, moveGroup: moveGroup, moveColumnWithinGroup: moveColumnWithinGroup, flattenCategoryHeaders: flattenCategoryHeaders, minimumPrintWidth: minimumPrintWidth, fromPreferenceRecords: fromPreferenceRecords, toPreferenceRecords: toPreferenceRecords };
+  return { buildColumns: buildColumns, normalizeRows: normalizeRows, calculateTotals: calculateTotals, groupColumnsByTopGroup: groupColumnsByTopGroup, orderColumnsByKeys: orderColumnsByKeys, moveGroup: moveGroup, moveColumnWithinGroup: moveColumnWithinGroup, flattenCategoryHeaders: flattenCategoryHeaders, minimumPrintWidth: minimumPrintWidth, fromPreferenceRecords: fromPreferenceRecords, toPreferenceRecords: toPreferenceRecords };
 });

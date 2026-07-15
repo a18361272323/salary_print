@@ -38,12 +38,15 @@ button:focus-visible,select:focus-visible{outline:3px solid rgba(183,151,88,.35)
 .column-group-head b{font-size:13px}
 .column-item{display:flex;gap:8px;align-items:center;margin:0;padding:9px 10px;border-bottom:1px solid var(--line);font-size:13px}
 .column-item:last-child{border-bottom:0}
-.column-item span{display:grid;gap:2px}
+.column-toggle{display:flex;gap:8px;align-items:center;min-width:0}
+.column-toggle>span{display:grid;gap:2px;min-width:0}
 .column-item b{font-weight:700}
 .column-item em{color:var(--muted);font-size:11px;font-style:normal}
 .sort-actions{display:flex;gap:4px;margin-left:auto}
 .sort-actions button{width:26px;min-height:26px;padding:0;border-color:transparent;background:transparent;color:var(--pine);font-size:16px;line-height:1}
 .sort-actions button:hover:not(:disabled){border-color:var(--line);background:rgba(23,77,66,.08);box-shadow:none}
+.drag-handle{cursor:grab;letter-spacing:1px}
+.drag-handle:active{cursor:grabbing}
 .preview-card{min-width:0}
 .preview-head{display:flex;justify-content:space-between;padding:0 3px 10px}
 .preview-head small{color:var(--muted);font-size:12px}

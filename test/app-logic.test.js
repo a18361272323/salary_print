@@ -1,7 +1,7 @@
 const assert = require("node:assert/strict");
 const test = require("node:test");
 
-const { buildColumns, calculateTotals, normalizeRows, groupColumnsByTopGroup, moveGroup, moveColumnWithinGroup, fromPreferenceRecords, toPreferenceRecords, flattenCategoryHeaders } = require("../app-logic");
+const { buildColumns, calculateTotals, normalizeRows, groupColumnsByTopGroup, orderColumnsByKeys, moveGroup, moveColumnWithinGroup, fromPreferenceRecords, toPreferenceRecords, flattenCategoryHeaders } = require("../app-logic");
 
 test("keeps non-printing fields for column configuration and assigns print widths", () => {
   const columns = buildColumns([
@@ -77,4 +77,14 @@ test("moves a second-level header only inside its first-level group", () => {
   ], "ALLOW", -1);
 
   assert.deepEqual(moved.map((column) => [column.key, column.order]), [["STFNAM", 100], ["ALLOW", 200], ["BASEPAY", 300], ["NETPAY", 400]]);
+});
+
+test("persists a drag-derived column order with normalized display values", () => {
+  const ordered = orderColumnsByKeys([
+    { key: "STFNAM", order: 100 },
+    { key: "BASEPAY", order: 200 },
+    { key: "NETPAY", order: 300 }
+  ], ["NETPAY", "STFNAM", "BASEPAY"]);
+
+  assert.deepEqual(ordered.map((column) => [column.key, column.order]), [["NETPAY", 100], ["STFNAM", 200], ["BASEPAY", 300]]);
 });

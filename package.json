@@ -3,6 +3,6 @@
   "private": true,
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node --check print-layout.js && node --check salary-data-loader.js && node --check print-workflow.js && node --check print-renderer.js && node --check model-method-client.js && node --check runtime-context.js && node --check column-preference-store.js && node --check month-picker.js && node --check app-logic.js && node --check workspace-template.js && node --check app.js"
+    "check": "node --check print-layout.js && node --check salary-data-loader.js && node --check print-workflow.js && node --check print-renderer.js && node --check model-method-client.js && node --check runtime-context.js && node --check column-preference-store.js && node --check month-picker.js && node --check app-logic.js && node --check workspace-template.js && node --check sortable-runtime.js && node --check app.js"
   }
 }
