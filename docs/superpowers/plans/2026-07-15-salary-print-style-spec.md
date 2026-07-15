@@ -62,5 +62,5 @@
 - Modify: `onmount-salary-print.js` (ignored local artifact)
 
 - [x] Run `npm test`, `npm run check`, and `git diff --check`.
-- [ ] Push source, refresh immutable asset URLs, regenerate the helper-generated onMount wrapper while preserving `SalaryPrintModelConfig`, and push the manifest.
-- [ ] Re-run payload/reference checks and confirm a clean worktree.
+- [x] Push source, refresh immutable asset URLs, regenerate the helper-generated onMount wrapper while preserving `SalaryPrintModelConfig`, and push the manifest.
+- [x] Re-run payload/reference checks and confirm a clean worktree.
