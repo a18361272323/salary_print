@@ -17,6 +17,24 @@ function addManifestFallback(html, fallbackUrl) {
     .replace(fetchBlock, "loadAssetManifest()");
 }
 
+function addModelConfig(html, modelConfig) {
+  const source = String(html || "");
+  const config = modelConfig && typeof modelConfig === "object" ? modelConfig : null;
+  if (!config || !config.modelKey || !config.methods || !config.methods.list || !config.methods.create || !config.methods.update) {
+    throw new Error("Missing model configuration.");
+  }
+  if (!/<\/head>/i.test(source)) throw new Error("Generated srcdoc is missing a head element.");
+  const declaration = "<script>window.SalaryPrintModelConfig=" + JSON.stringify({
+    modelKey: String(config.modelKey),
+    methods: {
+      list: String(config.methods.list),
+      create: String(config.methods.create),
+      update: String(config.methods.update)
+    }
+  }) + ";</script>";
+  return source.replace(/<\/head>/i, declaration + "</head>");
+}
+
 if (require.main === module) {
   const inputPath = process.argv[2];
   const outputPath = process.argv[3];
@@ -25,4 +43,4 @@ if (require.main === module) {
   fs.writeFileSync(outputPath, addManifestFallback(fs.readFileSync(inputPath, "utf8"), fallbackUrl), "utf8");
 }
 
-module.exports = { addManifestFallback };
+module.exports = { addManifestFallback, addModelConfig };
