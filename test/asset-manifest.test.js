@@ -8,7 +8,7 @@ test("keeps assets relative so a pinned fallback manifest can load the same revi
   const srcdocManifest = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "srcdoc-manifest.json"), "utf8"));
 
   assert.ok(manifest.css.concat(manifest.js).every((asset) => asset.startsWith("./")));
-  assert.match(srcdocManifest.assetManifestUrl, /@4019175711b122877c6348d7a728fb0ed975e835\/assets\.json$/);
-  assert.match(srcdocManifest.assetManifestFallbackUrl, /\/4019175711b122877c6348d7a728fb0ed975e835\/assets\.json$/);
+  assert.match(srcdocManifest.assetManifestUrl, /@401917588b9356f9b367bbc2d659484b3d786947\/assets\.json$/);
+  assert.match(srcdocManifest.assetManifestFallbackUrl, /\/401917588b9356f9b367bbc2d659484b3d786947\/assets\.json$/);
   assert.match(srcdocManifest.assetManifestFallbackUrl, /^https:\/\/raw\.githubusercontent\.com\/a18361272323\/salary_print\/[0-9a-f]+\/assets\.json$/);
 });
