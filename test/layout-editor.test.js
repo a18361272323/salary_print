@@ -104,6 +104,18 @@ test("opens synchronously with an explicit data lock and reports a blocked popup
   assert.doesNotMatch(source, /field toggle|reorder control/i);
 });
 
+test("opens against the browser global window when a caller does not inject one", function () {
+  var harness = makePopupHarness();
+  var previous = global.window;
+  global.window = harness.window;
+  try {
+    var popup = editor.openLayoutEditor({});
+    assert.equal(popup, harness.popup);
+  } finally {
+    global.window = previous;
+  }
+});
+
 test("uses the pointer event id and reflects width dragging in the preview before committing history", function () {
   var source = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "layout-editor.js"), "utf8");
   assert.match(source, /addEventListener\("pointerdown", function \(event\) \{ if \(!isBusy\(\) && control\.setPointerCapture && event\.pointerId !== undefined\) control\.setPointerCapture\(event\.pointerId\); \}\)/);

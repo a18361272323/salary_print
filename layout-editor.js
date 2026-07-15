@@ -191,7 +191,7 @@
 
   function openLayoutEditor(options) {
     var config = options || {};
-    var ownerWindow = config.window || root.window;
+    var ownerWindow = config.window || (typeof window !== "undefined" ? window : null);
     if (!ownerWindow || typeof ownerWindow.open !== "function") {
       if (typeof config.onBlocked === "function") config.onBlocked();
       return null;
