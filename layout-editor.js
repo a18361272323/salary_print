@@ -143,6 +143,29 @@
     return '<option value="' + escapeHtml(value) + '"' + (selected ? " selected" : "") + ">" + escapeHtml(label) + "</option>";
   }
 
+  function columnMinimumWidth(column) {
+    var configured = Number(column && column.minWidthMm);
+    var fallback = Number(column && column.widthMm);
+    var minimum = Number.isFinite(configured) ? configured : (Number.isFinite(fallback) ? fallback : 0);
+    return Math.max(0, Math.min(80, minimum));
+  }
+
+  function effectiveColumnWidth(column, value) {
+    var minimum = columnMinimumWidth(column);
+    var requested = Number(value);
+    return Math.max(minimum, Math.min(80, Number.isFinite(requested) ? requested : minimum));
+  }
+
+  function normalizeEditorLayout(layout, columns) {
+    var normalized = getDependencies().layoutConfig.normalizeLayout(layout);
+    var widths = normalized.columnWidthsByKey;
+    (Array.isArray(columns) ? columns : []).forEach(function (column) {
+      var key = column && column.key;
+      if (typeof key === "string" && Object.prototype.hasOwnProperty.call(widths, key)) widths[key] = effectiveColumnWidth(column, widths[key]);
+    });
+    return normalized;
+  }
+
   function fontControls(section, value, extras) {
     var common = '<label>字体<select name="' + section + '.fontFamily">' + option("SimSun", "宋体", value.fontFamily === "SimSun") + option("Arial", "Arial", value.fontFamily === "Arial") + '</select></label><label>字号<input name="' + section + '.fontSizePt" type="number" min="8" max="24" value="' + value.fontSizePt + '"></label><label>颜色<input name="' + section + '.color" type="color" value="' + value.color + '"></label>';
     return '<section class="inspector-section"><h2>' + escapeHtml(extras.title) + '</h2>' + common + (extras.rowHeight ? '<label>行高<input name="' + section + '.rowHeightPx" type="number" min="16" max="48" value="' + value.rowHeightPx + '"></label>' : "") + (extras.height ? '<label>高度<input name="' + section + '.heightMm" type="number" min="0" max="20" value="' + value.heightMm + '"></label>' : "") + (extras.boolean ? '<label class="check"><input name="' + section + '.' + extras.boolean + '" type="checkbox"' + (value[extras.boolean] ? " checked" : "") + ">" + escapeHtml(extras.booleanLabel) + "</label>" : "") + "</section>";
@@ -153,9 +176,9 @@
     var widths = scope === "salary_group" ? columns.map(function (column) {
       var key = typeof column.key === "string" ? column.key : "";
       if (!key) return "";
-      var base = Number(column.widthMm);
-      var width = Object.prototype.hasOwnProperty.call(layout.columnWidthsByKey, key) ? layout.columnWidthsByKey[key] : (Number.isFinite(base) ? base : 20);
-      return '<label class="width-control"><span>' + escapeHtml(column.name || column.label || key) + '</span><input data-width-key="' + escapeHtml(key) + '" type="range" min="0" max="80" value="' + width + '"><output>' + width + 'mm</output></label>';
+      var minimum = columnMinimumWidth(column);
+      var width = effectiveColumnWidth(column, Object.prototype.hasOwnProperty.call(layout.columnWidthsByKey, key) ? layout.columnWidthsByKey[key] : minimum);
+      return '<label class="width-control"><span>' + escapeHtml(column.name || column.label || key) + '</span><input data-width-key="' + escapeHtml(key) + '" type="range" min="' + minimum + '" max="80" value="' + width + '"><output>' + width + 'mm</output></label>';
     }).join("") : "";
     var widthInspector = scope === "salary_group" ? '<section class="inspector-section width-inspector"><h2>列宽（仅当前薪资组）</h2>' + widths + "</section>" : '<section class="inspector-section width-inspector"><h2>列宽</h2><p>个人默认不保存或预览列宽，请在当前薪资组中调整。</p></section>';
     return page + fontControls("title", layout.title, { title: "标题", boolean: "underline", booleanLabel: "下划线" }) + fontControls("groupHeader", layout.groupHeader, { title: "分组表头", rowHeight: true, boolean: "bold", booleanLabel: "加粗" }) + fontControls("fieldHeader", layout.fieldHeader, { title: "字段表头", rowHeight: true, boolean: "bold", booleanLabel: "加粗" }) + fontControls("body", layout.body, { title: "明细行", rowHeight: true }) + fontControls("total", layout.total, { title: "合计行", rowHeight: true }) + fontControls("signature", layout.signature, { title: "签署区", height: true }) + '<section class="inspector-section"><h2>边框</h2><label>颜色<input name="border.color" type="color" value="' + layout.border.color + '"></label><p>边框固定为 1px 实线。</p></section>' + widthInspector;
@@ -172,9 +195,8 @@
       else groups.push({ label: label, count: 1 });
     });
     var colgroup = columns.map(function (column) {
-      var width = widths[column.key];
-      var style = typeof width === "number" && Number.isFinite(width) ? ' style="width:' + width + 'mm"' : "";
-      return '<col data-preview-key="' + escapeHtml(column.key) + '"' + style + ">";
+      var width = effectiveColumnWidth(column, Object.prototype.hasOwnProperty.call(widths, column.key) ? widths[column.key] : column.widthMm);
+      return '<col data-preview-key="' + escapeHtml(column.key) + '" style="width:' + width + 'mm">';
     }).join("");
     var groupHeaders = groups.map(function (group) { return '<th colspan="' + group.count + '">' + escapeHtml(group.label) + "</th>"; }).join("");
     var headers = columns.map(function (column) { return '<th data-preview-key="' + escapeHtml(column.key) + '">' + escapeHtml(column.name || column.label || column.key) + "</th>"; }).join("");
@@ -215,9 +237,9 @@
       return null;
     }
 
-    var controller = createDraftController({ layout: config.layout });
     var rows = Array.isArray(config.rows) ? config.rows.slice() : [];
     var columns = Array.isArray(config.columns) ? config.columns.map(function (column) { return Object.assign({}, column); }) : [];
+    var controller = createDraftController({ layout: normalizeEditorLayout(config.layout, columns) });
     var pendingWidths = Object.create(null);
     var frameScheduled = false;
     var saveInFlight = false;

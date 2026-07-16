@@ -124,6 +124,18 @@ test("uses the pointer event id and reflects width dragging in the preview befor
   assert.match(source, /controller\.replaceWidth\(key, pendingWidths\[key\]\)/);
 });
 
+test("uses the printed column minimum as the width slider lower bound", function () {
+  var harness = makePopupHarness();
+  editor.openLayoutEditor({
+    window: harness.window,
+    columns: [{ key: "POSSEQ", label: "岗位", widthMm: 20, minWidthMm: 28 }],
+    layout: { columnWidthsByKey: { POSSEQ: 14 } }
+  });
+
+  assert.match(harness.elements.inspector.innerHTML, /data-width-key="POSSEQ" type="range" min="28" max="80" value="28"/);
+  assert.match(harness.elements.previewSheet.innerHTML, /<col data-preview-key="POSSEQ" style="width:28mm">/);
+});
+
 test("renders a read-only preview with each editable layout section visibly represented", function () {
   var source = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "layout-editor.js"), "utf8");
   ["group-header", "field-header", "<tbody", "<tfoot", "signature", "--salary-group-header-font-family", "--salary-field-header-font-family", "--salary-body-font-family", "--salary-total-font-family", "--salary-signature-font-family"].forEach(function (required) {
