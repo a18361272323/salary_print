@@ -217,9 +217,11 @@ module.exports = async function fn(state) {
 | `current` | `1` | 第一页 |
 | `pageSize` | `200` | 必须覆盖单份工资表的最大列数 |
 | `owner_user_no` | `${xcUser.userNo}` | 服务端当前用户，不从前端传入 |
+| `config_scope` | `personal` | 常量，只回读个人配置 |
 | `profile_type` | `column` | 常量，直接输入 |
 | `salary_group_id` | `${salaryGroupId}` | 来自校验节点 |
 | `salary_cycle` | `${salaryCycle}` | 来自校验节点 |
+| `enabled` | `1` | 常量，只回读启用记录 |
 
 不要只按薪资组查询，必须同时带当前用户、所属期和 `profile_type`，否则可能删除其他配置。
 
