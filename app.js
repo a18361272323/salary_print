@@ -27,7 +27,9 @@
         var control = $(id);
         if (!control) return;
         if (locked) {
-          control.dataset.operationDisabled = control.disabled ? "1" : "0";
+          if (control.dataset.operationDisabled === undefined) {
+            control.dataset.operationDisabled = control.disabled ? "1" : "0";
+          }
           control.disabled = true;
         } else if (control.dataset.operationDisabled !== undefined) {
           control.disabled = control.dataset.operationDisabled === "1";
@@ -36,7 +38,9 @@
       });
       document.querySelectorAll("#columnEditor input, #columnEditor button").forEach(function (control) {
         if (locked) {
-          control.dataset.operationDisabled = control.disabled ? "1" : "0";
+          if (control.dataset.operationDisabled === undefined) {
+            control.dataset.operationDisabled = control.disabled ? "1" : "0";
+          }
           control.disabled = true;
         } else if (control.dataset.operationDisabled !== undefined) {
           control.disabled = control.dataset.operationDisabled === "1";

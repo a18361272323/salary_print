@@ -51,3 +51,12 @@ test("recomputes query action availability after the query lock is released", ()
   assert.match(source, /function query\(\) \{\s*return runOperation\("querying", queryInternal\)\.then\(function \(value\) \{\s*restoreQueryActionAvailability\(\);/);
   assert.match(source, /function \(error\) \{\s*restoreQueryActionAvailability\(\);\s*throw error;/);
 });
+
+test("preserves each control's original state across repeated operation-lock renders", () => {
+  const source = appSource();
+
+  const presentation = source.match(/function setOperationPresentation\(operation\) \{([\s\S]*?)\n    \}/);
+
+  assert.ok(presentation);
+  assert.match(presentation[1], /if \(control\.dataset\.operationDisabled === undefined\) \{\s*control\.dataset\.operationDisabled = control\.disabled \? "1" : "0";\s*\}/);
+});
