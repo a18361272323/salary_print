@@ -24,14 +24,16 @@ function addModelConfig(html, modelConfig) {
     throw new Error("Missing model configuration.");
   }
   if (!/<\/head>/i.test(source)) throw new Error("Generated srcdoc is missing a head element.");
-  const declaration = "<script>window.SalaryPrintModelConfig=" + JSON.stringify({
+  const runtimeConfig = {
     modelKey: String(config.modelKey),
     methods: {
       list: String(config.methods.list),
       create: String(config.methods.create),
       update: String(config.methods.update)
     }
-  }) + ";</script>";
+  };
+  if (config.columnSaveApiKey) runtimeConfig.columnSaveApiKey = String(config.columnSaveApiKey);
+  const declaration = "<script>window.SalaryPrintModelConfig=" + JSON.stringify(runtimeConfig) + ";</script>";
   return source.replace(/<\/head>/i, declaration + "</head>");
 }
 

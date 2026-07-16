@@ -23,3 +23,14 @@ test("injects the read-back column-model configuration before the generated load
   assert.match(patched, /window\.SalaryPrintModelConfig=\{"modelKey":"model-key","methods":\{"list":"list-key","create":"create-key","update":"update-key"\}\};/);
   assert.ok(patched.indexOf("SalaryPrintModelConfig") < patched.indexOf("loadAssets()"));
 });
+
+test("preserves the read-back batch column-save API key in the runtime configuration", () => {
+  const html = "<!doctype html><html><head></head><body></body></html>";
+  const patched = addModelConfig(html, {
+    modelKey: "model-key",
+    methods: { list: "list-key", create: "create-key", update: "update-key" },
+    columnSaveApiKey: "batch-save-key"
+  });
+
+  assert.match(patched, /"columnSaveApiKey":"batch-save-key"/);
+});

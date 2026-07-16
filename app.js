@@ -1,5 +1,5 @@
 (function waitForDependencies(attempt) {
-  var dependencies = ["SalaryPrintWorkspaceTemplate", "SalaryPrintMonthPicker", "SalaryPrintDataLoader", "SalaryPrintLayout", "SalaryPrintWorkflow", "SalaryPrintRenderer", "SalaryPrintDocument", "SalaryPrintModelMethodClient", "SalaryPrintRuntimeContext", "SalaryPrintColumnPreferenceStore", "SalaryPrintLayoutConfig", "SalaryPrintLayoutEditor", "SalaryPrintLayoutProfileStore", "SalaryPrintRequestEnvironment", "SalaryPrintCryptoRuntime", "SalaryPrintSortable", "SalaryPrintAppSession"];
+  var dependencies = ["SalaryPrintWorkspaceTemplate", "SalaryPrintMonthPicker", "SalaryPrintDataLoader", "SalaryPrintLayout", "SalaryPrintWorkflow", "SalaryPrintRenderer", "SalaryPrintDocument", "SalaryPrintModelMethodClient", "SalaryPrintRuntimeContext", "SalaryPrintColumnPreferenceStore", "SalaryPrintLayoutConfig", "SalaryPrintLayoutEditor", "SalaryPrintLayoutProfileStore", "SalaryPrintRequestEnvironment", "SalaryPrintCryptoRuntime", "SalaryPrintSortable", "SalaryPrintAppSession", "SalaryPrintOperationCoordinator", "SalaryPrintColumnConfigApiClient"];
   var missing = dependencies.filter(function (name) { return !window[name]; });
   if (missing.length) {
     if (attempt >= 200) { console.error("工资表资源加载失败：" + missing.join(", ")); return; }
@@ -11,10 +11,45 @@
     SalaryPrintWorkspaceTemplate.mount(document);
     var endpoints = { groups: "/xft-gateway/xft-sly/xwapi/salary-calculate/salary-group/sort-query", headers: "/xft-gateway/xft-sly/xwapi/salary-calculate/current-salary/item-header", page: "/xft-gateway/xft-sly/xwapi/salary-query/data-page", key: "/xft-gateway/xft-login-new/xwapi/gateway/security-key/generate" };
     var publicKey = "BGMptcE9RGTbVT6NbGLx04ZucPEaRoIOJFM+IrxrwoOdudO7QHgaIX9xq/YcxqWOGGN3WXcvpzoNSZ7ItgerhYU=";
-    var state = { session: null, groups: [], headers: [], columns: [], rows: [], cancelled: false, document: null, sequence: 0, monthKey: null, monthView: null, preferenceStore: null, preferenceRecords: [], layoutStore: null, layoutRecords: { global: null, group: null }, layout: null, sortables: [], queryGuard: SalaryPrintAppSession.createQueryGuard(), queryInFlight: false };
+    var state = { session: null, groups: [], headers: [], columns: [], rows: [], cancelled: false, document: null, sequence: 0, monthKey: null, monthView: null, preferenceStore: null, preferenceRecords: [], columnConfigApiClient: null, layoutStore: null, layoutRecords: { global: null, group: null }, layout: null, sortables: [], queryGuard: SalaryPrintAppSession.createQueryGuard(), queryInFlight: false, operation: null };
 
     function $(id) { return document.getElementById(id); }
     function setStatus(value, error) { $("status").textContent = value; $("status").style.color = error ? "#a83b32" : ""; }
+    function setOperationPresentation(operation) {
+      var status = $("operationStatus");
+      var spinner = $("operationSpinner");
+      if (!status || !spinner) return;
+      var locked = operation.kind !== "idle";
+      var ids = ["groupSelect", "monthPickerButton", "monthPrevious", "monthNext", "paperSelect", "queryButton", "saveColumns", "editLayout", "printButton", "resetColumns"];
+      spinner.hidden = !locked;
+      status.lastChild.textContent = locked ? operation.label + "，请稍候。" : "就绪";
+      ids.forEach(function (id) {
+        var control = $(id);
+        if (!control) return;
+        if (locked) {
+          control.dataset.operationDisabled = control.disabled ? "1" : "0";
+          control.disabled = true;
+        } else if (control.dataset.operationDisabled !== undefined) {
+          control.disabled = control.dataset.operationDisabled === "1";
+          delete control.dataset.operationDisabled;
+        }
+      });
+      document.querySelectorAll("#columnEditor input, #columnEditor button").forEach(function (control) {
+        if (locked) {
+          control.dataset.operationDisabled = control.disabled ? "1" : "0";
+          control.disabled = true;
+        } else if (control.dataset.operationDisabled !== undefined) {
+          control.disabled = control.dataset.operationDisabled === "1";
+          delete control.dataset.operationDisabled;
+        }
+      });
+      if (state.monthKey && state.monthView) renderMonthPicker();
+    }
+    function runOperation(kind, action) {
+      if (!state.operation) return Promise.resolve().then(action);
+      return state.operation.run(kind, action);
+    }
+    function workspaceIsLocked() { return !!(state.operation && state.operation.isBusy()); }
     function b64bytes(value) { return Array.from(Uint8Array.from(atob(value), function (c) { return c.charCodeAt(0); })); }
     function bytes64(value) { return btoa(String.fromCharCode.apply(null, value)); }
     function bytes(value) { return Array.from(new TextEncoder().encode(value)); }
@@ -59,13 +94,13 @@
 
     function escapeHtml(value) { return String(value === undefined || value === null ? "" : value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;"); }
     function destroySortables() { state.sortables.forEach(function (sortable) { sortable.destroy(); }); state.sortables = []; }
-    function syncDragOrder() { var keys = []; $("columnEditor").querySelectorAll(".column-group-items .column-item").forEach(function (item) { keys.push(item.dataset.key); }); state.columns = SalaryPrintLogic.orderColumnsByKeys(state.columns, keys); setStatus("字段顺序已调整，请保存列配置。"); renderColumns(); prepare(); }
+    function syncDragOrder() { if (workspaceIsLocked()) { renderColumns(); return; } var keys = []; $("columnEditor").querySelectorAll(".column-group-items .column-item").forEach(function (item) { keys.push(item.dataset.key); }); state.columns = SalaryPrintLogic.orderColumnsByKeys(state.columns, keys); setStatus("字段顺序已调整，请保存列配置。"); renderColumns(); prepare(); }
     function initializeDragSorting() {
       var editor = $("columnEditor");
       var Sortable = window.SalaryPrintSortable;
       if (!Sortable) return;
-      state.sortables.push(new Sortable(editor, { animation: 150, draggable: ".column-group", handle: ".group-drag", onEnd: syncDragOrder }));
-      editor.querySelectorAll(".column-group-items").forEach(function (list, index) { state.sortables.push(new Sortable(list, { group: { name: "salary-print-columns-" + index, pull: false, put: false }, animation: 150, draggable: ".column-item", handle: ".column-drag", onEnd: syncDragOrder })); });
+      state.sortables.push(new Sortable(editor, { animation: 150, draggable: ".column-group", handle: ".group-drag", onMove: function () { return !workspaceIsLocked(); }, onEnd: syncDragOrder }));
+      editor.querySelectorAll(".column-group-items").forEach(function (list, index) { state.sortables.push(new Sortable(list, { group: { name: "salary-print-columns-" + index, pull: false, put: false }, animation: 150, draggable: ".column-item", handle: ".column-drag", onMove: function () { return !workspaceIsLocked(); }, onEnd: syncDragOrder })); });
     }
     function renderColumns() {
       var groups = SalaryPrintLogic.groupColumnsByTopGroup(state.columns);
@@ -82,19 +117,30 @@
       editor.querySelectorAll(".group-move").forEach(function (button) { button.onclick = function () { state.columns = SalaryPrintLogic.moveGroup(state.columns, button.dataset.group, Number(button.dataset.direction)); renderColumns(); prepare(); }; });
       editor.querySelectorAll(".column-move").forEach(function (button) { button.onclick = function () { state.columns = SalaryPrintLogic.moveColumnWithinGroup(state.columns, button.dataset.key, Number(button.dataset.direction)); renderColumns(); prepare(); }; });
       initializeDragSorting();
+      if (state.operation && state.operation.isBusy()) setOperationPresentation(state.operation.current());
     }
 
     function initializeProfileStores() {
       var config = window.SalaryPrintModelConfig || {};
       var methods = config.methods || {};
-      if (!config.modelKey || !methods.list || !methods.create || !methods.update) return { preferenceStore: null, layoutStore: null };
+      if (!config.modelKey || !methods.list || !methods.create || !methods.update) return { preferenceStore: null, layoutStore: null, columnConfigApiClient: null };
       var runtime = SalaryPrintRuntimeContext.createRuntimeContext();
       var client = SalaryPrintModelMethodClient.createModelMethodClient({ baseUrl: runtime.baseUrl, modelKey: config.modelKey, methods: methods });
       var owner;
       function getOwnerUserNo() { owner = owner || runtime.getOwnerUserNo(); return owner; }
+      var columnConfigApiClient = null;
+      if (config.columnSaveApiKey) {
+        columnConfigApiClient = SalaryPrintColumnConfigApiClient.createColumnConfigApiClient({ run: async function (input) {
+          var response = await fetch(runtime.baseUrl + "/api/run/" + encodeURIComponent(config.columnSaveApiKey), { method: "POST", credentials: "include", headers: { "content-type": "application/json", "accept": "application/json, text/plain, */*", "xcode-appsource": "procode" }, body: JSON.stringify(input) });
+          var envelope = await response.json().catch(function () { return {}; });
+          if (!response.ok || envelope.returnCode !== "SUC0000") throw new Error(envelope.errorMsg || "保存列配置接口调用失败");
+          return envelope.body;
+        } });
+      }
       return {
         preferenceStore: SalaryPrintColumnPreferenceStore.createColumnPreferenceStore({ client: client, getOwnerUserNo: getOwnerUserNo }),
-        layoutStore: SalaryPrintLayoutProfileStore.createLayoutProfileStore({ client: client, getOwnerUserNo: getOwnerUserNo })
+        layoutStore: SalaryPrintLayoutProfileStore.createLayoutProfileStore({ client: client, getOwnerUserNo: getOwnerUserNo }),
+        columnConfigApiClient: columnConfigApiClient
       };
     }
 
@@ -124,13 +170,14 @@
 
     async function saveColumns() {
       if (state.queryInFlight) { setStatus("正在刷新工资表，请稍后保存列配置。", true); return; }
-      if (!state.preferenceStore) { setStatus("列配置模型尚未注入，无法保存。", true); return; }
+      if (!state.columnConfigApiClient) { setStatus("列配置保存接口尚未注入，无法保存。", true); return; }
       if (!state.headers.length) { setStatus("请先生成工资表后再保存列配置。", true); return; }
       try {
-        await state.preferenceStore.save({ salaryGroupId: $("groupSelect").value, salaryCycle: state.monthKey, columns: state.columns, records: state.preferenceRecords });
-        var loaded = await state.preferenceStore.load({ salaryGroupId: $("groupSelect").value, salaryCycle: state.monthKey });
-        state.preferenceRecords = loaded.records;
-        setStatus("个人列配置已保存。");
+        var saved = await runOperation("savingColumns", function () {
+          return state.columnConfigApiClient.save({ salaryGroupId: $("groupSelect").value, salaryCycle: state.monthKey, columns: state.columns });
+        });
+        state.preferenceRecords = saved.records;
+        setStatus("个人列配置已保存 " + saved.savedCount + " 项。");
       } catch (error) { setStatus(error.message || "保存列配置失败", true); }
     }
 
@@ -183,28 +230,34 @@
         scope: "salary_group",
         isOpenerAvailable: function () { return state.rows.length > 0 && state.headers.length > 0 && snapshotIsLive(); },
         onBlocked: function () { setStatus("浏览器拦截了版式编辑窗口，请允许弹窗后重试。", true); },
-        onError: function (error) { setStatus(error.message || "无法打开版式编辑器", true); },
-        onSave: async function (layout, scope) {
-          if (!snapshotIsLive()) throw new Error("源工资表已变更，请返回后重新打开版式编辑器。");
-          await state.layoutStore.save({ scope: scope, salaryGroupId: snapshot.groupId, layout: layout, records: state.layoutRecords });
-          if (!snapshotIsLive()) throw new Error("源工资表已变更，请返回后重新打开版式编辑器。");
-          await reloadLayout(snapshot.groupId);
-          if (!snapshotIsLive()) throw new Error("源工资表已变更，请返回后重新打开版式编辑器。");
-          await prepare();
-          setStatus("版式已保存并重新生成预览。");
-        },
+            onError: function (error) { setStatus(error.message || "无法打开版式编辑器", true); },
+            onSave: async function (layout, scope) {
+              return runOperation("savingLayout", async function () {
+                if (!snapshotIsLive()) throw new Error("源工资表已变更，请返回后重新打开版式编辑器。");
+                await state.layoutStore.save({ scope: scope, salaryGroupId: snapshot.groupId, layout: layout, records: state.layoutRecords });
+                if (!snapshotIsLive()) throw new Error("源工资表已变更，请返回后重新打开版式编辑器。");
+                await reloadLayout(snapshot.groupId);
+                if (!snapshotIsLive()) throw new Error("源工资表已变更，请返回后重新打开版式编辑器。");
+                await prepare();
+                setStatus("版式已保存并重新生成预览。");
+              });
+            },
         onPrint: function (layout) {
           if (!snapshotIsLive()) return Promise.reject(new Error("源工资表已变更，请返回后重新打开版式编辑器。"));
           return SalaryPrintAppSession.runDirectPrint({
             openWindow: function () { return window.open("", "salary-print-document"); },
-            prepare: function () { if (!snapshotIsLive()) return Promise.reject(new Error("源工资表已变更，请返回后重新打开版式编辑器。")); return prepareDocument(SalaryPrintLayoutConfig.normalizeLayout(layout)); },
+            prepare: function () { if (!snapshotIsLive()) return Promise.reject(new Error("源工资表已变更，请返回后重新打开版式编辑器。")); return runOperation("preparingPrint", function () { return prepareDocument(SalaryPrintLayoutConfig.normalizeLayout(layout)); }); },
             write: function (popup, prepared) { if (!snapshotIsLive()) throw new Error("源工资表已变更，请返回后重新打开版式编辑器。"); writePrintDocument(popup, prepared); }
           });
         }
       });
     }
 
-    async function query() {
+    function query() {
+      return runOperation("querying", queryInternal).catch(function (error) { setStatus(error.message || "查询失败", true); });
+    }
+
+    async function queryInternal() {
       var groupId = $("groupSelect").value;
       var cycle = state.monthKey;
       var queryToken = state.queryGuard.begin();
@@ -254,7 +307,7 @@
       $("monthPickerButton").textContent = picker.formatMonthLabel(state.monthKey);
       $("monthGrid").innerHTML = Array.from({ length: 12 }, function (_, index) {
         var key = start.slice(0, 4) + String(index + 1).padStart(2, "0");
-        var disabled = !picker.canSelectMonth(key, nowKey);
+          var disabled = !picker.canSelectMonth(key, nowKey) || workspaceIsLocked();
         return '<button type="button" data-month="' + key + '" ' + (disabled ? "disabled" : "") + ' class="' + (key === state.monthKey ? "selected" : "") + '">' + String(index + 1).padStart(2, "0") + "月</button>";
       }).join("");
       $("monthGrid").querySelectorAll("button").forEach(function (button) { button.onclick = function () { if (button.disabled) return; state.monthKey = button.dataset.month; $("monthPickerDialog").hidden = true; renderMonthPicker(); }; });
@@ -283,8 +336,15 @@
     async function start() {
       state.monthKey = SalaryPrintMonthPicker.toMonthKey(new Date());
       state.monthView = state.monthKey;
+      state.operation = SalaryPrintOperationCoordinator.createOperationCoordinator({ onChange: setOperationPresentation });
+      window.addEventListener("beforeunload", function (event) {
+        var message = state.operation ? state.operation.beforeUnloadMessage() : "";
+        if (!message) return;
+        event.preventDefault();
+        event.returnValue = message;
+      });
       var stores = initializeProfileStores();
-      state.preferenceStore = stores.preferenceStore; state.layoutStore = stores.layoutStore;
+      state.preferenceStore = stores.preferenceStore; state.layoutStore = stores.layoutStore; state.columnConfigApiClient = stores.columnConfigApiClient;
       renderMonthPicker();
       $("monthPickerButton").onclick = function () { $("monthPickerDialog").hidden = !$("monthPickerDialog").hidden; };
       $("monthPrevious").onclick = function () { state.monthView = SalaryPrintMonthPicker.shiftMonth(state.monthView, -12); renderMonthPicker(); };
@@ -295,11 +355,13 @@
       $("printButton").onclick = printOnlyPages;
       $("editLayout").onclick = editLayout;
       var saveButton = $("saveColumns"); if (saveButton) saveButton.onclick = saveColumns;
-      $("resetColumns").onclick = function () { state.columns = SalaryPrintLogic.buildColumns(state.headers, []); state.preferenceRecords = []; renderColumns(); prepare(); };
+          $("resetColumns").onclick = function () { if (workspaceIsLocked()) return; state.columns = SalaryPrintLogic.buildColumns(state.headers, []); state.preferenceRecords = []; renderColumns(); prepare(); };
       try {
-        state.groups = await post(endpoints.groups, { authorityCode: "SASALSHW" });
-        $("groupSelect").innerHTML = state.groups.map(function (group) { return '<option value="' + group.salaryGroupId + '">' + group.salaryGroupName + "</option>"; }).join("");
-        setStatus("请选择薪资组和所属期后查询。");
+        await runOperation("initializing", async function () {
+          state.groups = await post(endpoints.groups, { authorityCode: "SASALSHW" });
+          $("groupSelect").innerHTML = state.groups.map(function (group) { return '<option value="' + group.salaryGroupId + '">' + group.salaryGroupName + "</option>"; }).join("");
+          setStatus("请选择薪资组和所属期后查询。");
+        });
       } catch (error) { setStatus(error.message || "初始化失败", true); }
     }
     start();

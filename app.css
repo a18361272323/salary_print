@@ -82,6 +82,9 @@ tfoot td{background:#f4ead3;font-weight:700}
 .month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .month-grid button{min-height:34px;padding:4px}
 .month-grid .selected{background:var(--pine);color:#fff}
+.operation-status{display:flex;align-items:center;gap:7px;min-height:20px;color:var(--pine);font-size:12px}
+#operationSpinner{width:10px;height:10px;border:2px solid rgba(23,77,66,.25);border-top-color:var(--pine);border-radius:50%;animation:operation-spin .7s linear infinite}
+@keyframes operation-spin{to{transform:rotate(360deg)}}
 .reveal{animation:reveal .45s both}
 .bento-grid .reveal:nth-child(2),.workspace .reveal:nth-child(2){animation-delay:.08s}
 @keyframes reveal{from{opacity:0;transform:translateY(8px)}

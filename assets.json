@@ -21,6 +21,8 @@
     "./crypto-runtime.js",
     "./sortable-runtime.js",
     "./app-session.js",
+    "./operation-coordinator.js",
+    "./column-config-api-client.js",
     "./app.js"
   ]
 }

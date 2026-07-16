@@ -15,3 +15,10 @@ test("provides loading progress, print fit summary and physical-page preview roo
   assert.match(markup, /class="column-panel[^>]*>[\s\S]*id="columnEditor"/);
   assert.doesNotMatch(markup, /masthead reveal/);
 });
+
+test("provides an accessible global operation status region", () => {
+  const markup = createWorkspaceMarkup();
+
+  assert.match(markup, /id="operationStatus"[^>]*aria-live="polite"/);
+  assert.match(markup, /id="operationSpinner"/);
+});
