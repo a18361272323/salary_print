@@ -77,6 +77,25 @@ test("uses the category endpoint as the authoritative first header for existing 
   assert.equal(columns[0].group, "人事信息");
 });
 
+test("keeps first-level header columns together when partial saved orders interleave categories", () => {
+  const columns = buildColumns([
+    { itemKey: "STFNAM", itemName: "姓名", categoryName: "人事信息", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "STFNBR", itemName: "员工号", categoryName: "人事信息", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "ORGSEQ", itemName: "部门", categoryName: "人事信息", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "POSSEQ", itemName: "岗位", categoryName: "人事信息", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "ENTDAT", itemName: "入职日期", categoryName: "人事信息", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "GRSPAY", itemName: "应发工资", categoryName: "统计项目", checkedStatus: "Y", totalHeadFlag: "Y" },
+    { itemKey: "PAYTAX", itemName: "应税工资", categoryName: "统计项目", checkedStatus: "Y", totalHeadFlag: "N" },
+    { itemKey: "BSBSWG", itemName: "基本工资", categoryName: "基本工资项目", checkedStatus: "Y", totalHeadFlag: "N" }
+  ], [
+    { columnKey: "STFNAM", displayOrder: 100 },
+    { columnKey: "GRSPAY", displayOrder: 200 },
+    { columnKey: "BSBSWG", displayOrder: 300 }
+  ]);
+
+  assert.deepEqual(columns.map((column) => column.key), ["STFNAM", "STFNBR", "ORGSEQ", "POSSEQ", "ENTDAT", "GRSPAY", "PAYTAX", "BSBSWG"]);
+});
+
 test("moves an entire first-level header group and rewrites its display order", () => {
   const moved = moveGroup([
     { key: "STFNAM", group: "人事信息", order: 100 },

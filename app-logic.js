@@ -27,7 +27,7 @@
 
   function buildColumns(headers, preferences) {
     var lookup = new Map((preferences || []).map(function (item) { return [item.columnKey, item]; }));
-    return (headers || []).map(function (header, index) {
+    var ordered = (headers || []).map(function (header, index) {
       var saved = lookup.get(header.itemKey) || {};
       return {
         key: header.itemKey,
@@ -46,6 +46,7 @@
         optional: !baseKeys.has(header.itemKey) && !requiredKeys.has(header.itemKey)
       };
     }).sort(function (left, right) { return left.order - right.order; });
+    return rewriteDisplayOrders(flattenGroups(groupColumnsByTopGroup(ordered)));
   }
 
   function normalizeRows(records, columns) {
