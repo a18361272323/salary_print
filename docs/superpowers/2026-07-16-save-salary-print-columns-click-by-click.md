@@ -42,6 +42,8 @@
 - 当前列表查询使用 `existingRecords` 作为存入变量，并按当前用户、薪资组、所属期、`profile_type=column` 查询。
 - 当前目标页面中服务端用户表达式为 `${xcUser.userNo}`。
 - 用户已选择当前保存接口采用“模型批量删除 + SQL `foreach` 批量新增”；这是本手册唯一需要落到画布的主链路。
+- 当前模型元数据已回读：数据源为“内置数据库”（TDSQL），物理表名为 `gzbdylpz`；不能再使用 `{salaryPrintColumnTable}` 占位符。
+- 已回读枚举值：`config_scope=personal`、`profile_type=column`、`align_mode=left|center|right`、`data_type=text|amount|day|count|date`、`sort_direction=ascending|descending`；本流程采用各字段当前默认值。
 - 官方 SQL 节点使用 MySQL 8.0+ 语法，支持 SELECT、INSERT、UPDATE，不支持 DELETE、DDL、DCL。
 - 官方 SQL 动态标签支持 `if`、`choose`、`when`、`otherwise`、`where`、`set`、`foreach`、`bind`；`foreach` 可生成批量 INSERT 的多行 `VALUES`。
 - 单个 SQL 节点内部有事务一致性；多个普通编排节点之间没有共同事务一致性。
@@ -50,7 +52,6 @@
 ### 必须在调试页确认后才能发布
 
 - 分支布尔条件的编辑器选择方式和日志回显。
-- SQL 编辑器中“工资表打印列配置”的物理表名、物理字段名和数据源；不要从模型显示名猜。
 - SQL `foreach` 中集合路径实际应填 `validatedColumns` 还是目标编辑器要求的其他路径形式。
 - SQL INSERT 节点的影响行数/返回结果形态，以及事务内步骤日志字段。
 - 最终调试响应是否将 `xcOutput` 放入响应 `body`。
@@ -304,14 +305,13 @@ module.exports = async function fn(state) {
 1. 真分支：在“替换已有配置”事务内的删除步骤后增加“SQL脚本”，标题填 `批量写入新配置`。
 2. else 分支：点击“替换已有配置”下自动出现的“其他（else）”路径对应的“+”，选择“SQL脚本”，标题填 `首次批量写入`；不要在画布主干另起一个 SQL 节点。
 3. 两个 SQL 节点都选择与目标模型相同的内置数据源。
-4. 打开 SQL 编辑器的模型/表/字段选择器，找到“工资表打印列配置”。
-5. 将真实物理表名记为 `{salaryPrintColumnTable}`，并逐项核对下面 SQL 的字段标识；选择器值不同就全部替换。
-6. 不要把模型中文名称当表名，也不要从别的环境复制表名。
+4. 当前模型元数据已回读：数据源为“内置数据库”（TDSQL），物理表名为 `gzbdylpz`。
+5. 字段名使用第 4.7.2 节脚本中的已读回字段编码；不要改为模型中文名、模型 Key `MO7tBV9c9q` 或别的环境表名。
 
 #### 4.7.2 两个 SQL 节点粘贴同一份 SQL
 
 ```sql
-INSERT INTO {salaryPrintColumnTable} (
+INSERT INTO gzbdylpz (
   config_scope, owner_user_no, profile_type, salary_group_id, salary_cycle,
   column_key, print_flag, display_order, top_group, second_group, total_flag,
   enabled, column_label_override, vertical_text, align_mode, data_type,
@@ -323,7 +323,7 @@ VALUES
     'personal', ${xcUser.userNo}, 'column', ${salaryGroupId}, ${salaryCycle},
     ${item.columnKey}, ${item.printFlag}, ${item.displayOrder},
     ${item.topGroup}, ${item.secondGroup}, ${item.totalFlag},
-    1, '', 0, 'center', 'text', 0, 0, 'ascending', ''
+    1, '', 0, 'left', 'text', 0, 0, 'ascending', ''
   )
 </foreach>
 ```
@@ -337,6 +337,8 @@ VALUES
 | 自动分页 | 关闭；INSERT 不分页 | 关闭；INSERT 不分页 |
 | 是否忽略错误 | 关闭 | 关闭 |
 | 下游节点 | 分支汇合后的“回读保存结果” | 分支汇合后的“回读保存结果” |
+
+脚本故意不写 `id`、`created_at`、`updated_at`、`creator`、`updater`、`deleted_at`、`is_deleted`，这些是当前模型的系统维护字段；也不写 `layout_scope`、`layout_payload`、`layout_version`，它们属于版式配置而非本次列配置快照。若首次调试提示某个系统字段无默认值，停止调试并保留完整报错，不要自行伪造审计字段。
 
 如果 SQL 编辑器不接受 `validatedColumns` 或 `${item.field}`，先用两条 `columns` 调试并根据 SQL 节点日志校正集合路径和参数语法；不要静默改写成循环单条新增。官方 `foreach` 支持数组/List/Set/Map，本流程输入的是数组。
 
@@ -472,7 +474,7 @@ module.exports = async function fn(state) {
 - [ ] 首次列表查询的 `existingRecords` 调试输出包含 `list`，或脚本已按实际输出形态调整。
 - [ ] 批量删除调试输入明确包含非空 `ids`。
 - [ ] 空旧记录样例不会执行批量删除。
-- [ ] 两个 SQL 节点的数据源、物理表名和字段名都从当前 SQL 编辑器选择器读取。
+- [ ] 两个 SQL 节点均选“内置数据库”，表名为已读回的 `gzbdylpz`，字段名与模型元数据一致。
 - [ ] SQL 日志显示 `foreach` 接收到全部 `validatedColumns`，一次批量 INSERT 完成。
 - [ ] 校验 JS 日志中同时存在 `validatedColumns` 和 `columnKeys`。
 - [ ] 任一新增失败时 API 不返回伪成功。
