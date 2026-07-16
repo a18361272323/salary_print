@@ -1,6 +1,6 @@
 {
   "appAlias": "salary-print-workbench",
   "title": "工资表打印工作台",
-  "assetManifestUrl": "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@3039501a6ae40b3b6860255979b079976e9e1840/assets.json",
-  "assetManifestFallbackUrl": "https://raw.githubusercontent.com/a18361272323/salary_print/3039501a6ae40b3b6860255979b079976e9e1840/assets.json"
+  "assetManifestUrl": "https://cdn.jsdelivr.net/gh/a18361272323/salary_print@d8f6c6d3e435deb8d27652e0662862a6c5404294/assets.json",
+  "assetManifestFallbackUrl": "https://raw.githubusercontent.com/a18361272323/salary_print/d8f6c6d3e435deb8d27652e0662862a6c5404294/assets.json"
 }
