@@ -426,8 +426,8 @@ module.exports = async function fn(state) {
 
 ```json
 {
-  "salaryGroupId": "{当前开发环境真实薪资组ID}",
-  "salaryCycle": "{当前开发环境真实YYYYMM所属期}",
+  "salaryGroupId": "000000000001",
+  "salaryCycle": "202606",
   "columns": [
     {
       "columnKey": "STFNAM",
