@@ -72,7 +72,7 @@
 
 | 字段 | 类型 | 必填 | 示例 | 规则 |
 | --- | --- | --- | --- | --- |
-| `columnKey` | string | 是 | `NETPAY` | 非空且整份快照内唯一 |
+| `columnKey` | string | 是 | `STFNAM` | 非空且整份快照内唯一；必须来自当前薪资表头接口返回的 `itemKey` |
 | `printFlag` | integer | 是 | `1` | 只能是 `0` 或 `1` |
 | `displayOrder` | integer | 是 | `100` | 必须是整数 |
 | `topGroup` | string | 否 | `统计` | 空值标准化为空字符串 |
@@ -426,15 +426,31 @@ module.exports = async function fn(state) {
 
 ```json
 {
-  "salaryGroupId": "group-demo",
-  "salaryCycle": "202606",
+  "salaryGroupId": "{当前开发环境真实薪资组ID}",
+  "salaryCycle": "{当前开发环境真实YYYYMM所属期}",
   "columns": [
     {
-      "columnKey": "NETPAY",
+      "columnKey": "STFNAM",
       "printFlag": 1,
       "displayOrder": 100,
-      "topGroup": "统计",
-      "secondGroup": "实发工资",
+      "topGroup": "人事信息",
+      "secondGroup": "姓名",
+      "totalFlag": 0
+    },
+    {
+      "columnKey": "GRSPAY",
+      "printFlag": 1,
+      "displayOrder": 200,
+      "topGroup": "统计项目",
+      "secondGroup": "应发工资",
+      "totalFlag": 1
+    },
+    {
+      "columnKey": "BSBSWG",
+      "printFlag": 1,
+      "displayOrder": 300,
+      "topGroup": "基本工资项目",
+      "secondGroup": "基本工资",
       "totalFlag": 1
     }
   ]
@@ -448,7 +464,7 @@ module.exports = async function fn(state) {
   "savedCount": 1,
   "records": [
     {
-      "column_key": "NETPAY",
+      "column_key": "STFNAM",
       "print_flag": 1,
       "display_order": 100
     }
