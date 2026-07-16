@@ -41,3 +41,13 @@ test("uses the coordinator for save and unload protection", () => {
   assert.match(source, /window\.addEventListener\("beforeunload"/);
   assert.match(source, /state\.operation\.beforeUnloadMessage\(\)/);
 });
+
+test("recomputes query action availability after the query lock is released", () => {
+  const source = appSource();
+
+  assert.match(source, /function restoreQueryActionAvailability\(\) \{/);
+  assert.match(source, /\$\("editLayout"\)\.disabled = !state\.rows\.length \|\| !state\.headers\.length \|\| !state\.layoutStore;/);
+  assert.match(source, /\$\("printButton"\)\.disabled = !state\.document;/);
+  assert.match(source, /function query\(\) \{\s*return runOperation\("querying", queryInternal\)\.then\(function \(value\) \{\s*restoreQueryActionAvailability\(\);/);
+  assert.match(source, /function \(error\) \{\s*restoreQueryActionAvailability\(\);\s*throw error;/);
+});

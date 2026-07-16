@@ -253,8 +253,20 @@
       });
     }
 
+    function restoreQueryActionAvailability() {
+      if (workspaceIsLocked()) return;
+      $("editLayout").disabled = !state.rows.length || !state.headers.length || !state.layoutStore;
+      $("printButton").disabled = !state.document;
+    }
+
     function query() {
-      return runOperation("querying", queryInternal).catch(function (error) { setStatus(error.message || "查询失败", true); });
+      return runOperation("querying", queryInternal).then(function (value) {
+        restoreQueryActionAvailability();
+        return value;
+      }, function (error) {
+        restoreQueryActionAvailability();
+        throw error;
+      }).catch(function (error) { setStatus(error.message || "查询失败", true); });
     }
 
     async function queryInternal() {
